@@ -3,7 +3,6 @@ import argparse
 import pandas as pd
 from os.path import join, basename
 
-import utils
 from src.data_service import DataService
 from src.json_service import JsonService
 from src.llm_service import chat_with_lm
@@ -13,14 +12,13 @@ from src.lm.gemma import Gemma
 from src.lm.llama2 import Llama2
 from src.lm.microsoft_phi_2 import MicrosoftPhi2
 from src.lm.mistral import Mistral
-from src.lm.mixtral import Mixtral
 from src.lm.openai_chatgpt import OpenAIGPT
-from src.lm.openai_gpt35_instruct import OpenAIGPT35Instruct
-from src.lm.rev_chatgpt_v1 import RevChatGPTV1
 from src.pandas_service import PandasService
 from src.sqlite_provider import SQLiteProvider
 from src.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter
-from utils import DATA_DIR
+
+
+DATA_DIR = "."
 
 
 if __name__ == '__main__':
