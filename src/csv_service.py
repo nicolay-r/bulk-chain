@@ -1,5 +1,7 @@
 import csv
 
+from tqdm import tqdm
+
 
 class CsvService:
 
@@ -24,22 +26,30 @@ class CsvService:
         CsvService.write(target, lines_it=__it())
 
     @staticmethod
-    def read(target, delimiter='\t', quotechar='"', skip_header=False, cols=None, return_row_ids=False):
-        assert(isinstance(cols, list) or cols is None)
+    def read(target, skip_header=False, cols=None, as_dict=False, row_id_key=None, **csv_kwargs):
+        assert (isinstance(row_id_key, str) or row_id_key is None)
+        assert (isinstance(cols, list) or cols is None)
 
         header = None
         with open(target, newline='\n') as f:
-            for row_id, row in enumerate(csv.reader(f, delimiter=delimiter, quotechar=quotechar)):
+            for row_id, row in tqdm(enumerate(csv.reader(f, **csv_kwargs)), desc="Reading CSV"):
                 if skip_header and row_id == 0:
-                    header = row
+                    header = ([row_id_key] if row_id_key is not None else []) + row
                     continue
 
                 # Determine the content we wish to return.
                 if cols is None:
                     content = row
                 else:
-                    row_d = {header[col_name]: value for col_name, value in enumerate(row)}
+                    row_d = {header[col_ind]: value for col_ind, value in enumerate(row)}
                     content = [row_d[col_name] for col_name in cols]
 
+                content = ([row_id-1] if row_id_key is not None else []) + content
+
                 # Optionally attach row_id to the content.
-                yield [row_id] + content if return_row_ids else content
+                if as_dict:
+                    assert (header is not None)
+                    assert (len(content) == len(header))
+                    yield {k: v for k, v in zip(header, content)}
+                else:
+                    yield content

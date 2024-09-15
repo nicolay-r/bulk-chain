@@ -4,7 +4,7 @@ from src.utils import iter_params
 class DataService(object):
 
     @staticmethod
-    def _compose_prompt_text(prompt, data_dict, field_names):
+    def compose_prompt_text(prompt, data_dict, field_names):
         assert(isinstance(data_dict, dict))
         fmt_d = {col_name: data_dict[col_name] for col_name in field_names}
 
@@ -18,5 +18,5 @@ class DataService(object):
     @staticmethod
     def get_prompt_text(prompt, data_dict, parse_fields_func=iter_params):
         field_names = list(parse_fields_func(prompt))
-        return DataService._compose_prompt_text(
+        return DataService.compose_prompt_text(
             prompt=prompt, data_dict=data_dict, field_names=field_names)

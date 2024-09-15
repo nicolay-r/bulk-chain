@@ -1,4 +1,5 @@
 {
+  "name": "thor-cot-schema",
   "schema": [
     {"prompt": "Given the sentence '{sentence}'. Which specific aspect of '{entity}' is possibly mentioned?", "out": "r_aspect"},
     {"prompt": "Given the sentence '{sentence}'. The mentioned aspect is about '{r_aspect}'. Based on the common sense, what is the implicit opinion towards the mentioned aspect of '{entity}', and why?", "out":  "r_opinion"},

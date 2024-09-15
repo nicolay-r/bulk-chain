@@ -1,8 +1,8 @@
 import argparse
 
-import pandas as pd
 from os.path import join, basename
 
+from src.csv_service import CsvService
 from src.data_service import DataService
 from src.json_service import JsonService
 from src.llm_service import chat_with_lm
@@ -13,7 +13,7 @@ from src.lm.llama2 import Llama2
 from src.lm.microsoft_phi_2 import MicrosoftPhi2
 from src.lm.mistral import Mistral
 from src.lm.openai_chatgpt import OpenAIGPT
-from src.pandas_service import PandasService
+from src.schema_service import SchemaService
 from src.sqlite_provider import SQLiteProvider
 from src.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter
 
@@ -35,8 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--temp', dest='temperature', type=float, default=0.1)
     parser.add_argument('--output', dest='output', type=str, default=None)
     parser.add_argument('--max-length', dest='max_length', type=int, default=None)
-    parser.add_argument('--hf-token', dest='huggingface_token', type=str, default=None)
-    parser.add_argument('--openai-token', dest='openai_token', type=str, default=None)
+    parser.add_argument('--api-token', dest='api_key', type=str, default=None)
     parser.add_argument('--limit', dest='limit', type=int, default=None,
                         help="Limit amount of source texts for prompting.")
     parser.add_argument('--limit-prompt', dest="limit_prompt", type=int, default=None,
@@ -48,10 +47,24 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # Setup prompt.
+    schema = SchemaService(json_data=JsonService.read_data(args.schema))
+
+    if schema is not None:
+        print(f"Using schema: {schema.name}")
+
+    transformers_default_cfg = {
+        "temp": args.temperature,
+        "max_length": args.max_length,
+        "token": args.api_key,
+        "use_bf16": args.use_bf16,
+        "device": args.device
+    }
+
     # List of the Supported models and their API wrappers.
     models_preset = {
         "google/gemma": lambda: Gemma(model_name=llm_model_name, temp=args.temperature, max_length=args.max_length,
-                                      token=args.huggingface_token, use_bf16=args.use_bf16, device=args.device),
+                                      token=args.api_key, use_bf16=args.use_bf16, device=args.device),
         "microsoft/phi-2": lambda: MicrosoftPhi2(model_name=llm_model_name, max_length=args.max_length,
                                                  device=args.device, use_bf16=args.use_bf16),
         "mistralai/Mistral": lambda: Mistral(model_name=llm_model_name, temp=args.temperature,
@@ -62,14 +75,14 @@ if __name__ == '__main__':
                                              max_length=args.max_length, device=args.device, use_bf16=args.use_bf16),
         "Deci/DeciLM-7B-instruct": lambda: DeciLM(model_name=llm_model_name, temp=args.temperature,
                                                   device=args.device, use_bf16=args.use_bf16, load_in_4bit=args.load_in_4b),
-        "openai": lambda: OpenAIGPT(api_key=args.openai_token,
+        "openai": lambda: OpenAIGPT(api_key=args.api_token,
                                     model_name=llm_model_name, temp=args.temperature, max_tokens=args.max_length),
     }
 
     input_providers = {
-        None: lambda _: chat_with_lm(llm, do_exit=True),
-        "csv": lambda filepath: PandasService.iter_rows_as_dict(df=pd.read_csv(filepath, sep=args.csv_sep),
-                                                                row_id_key="uid")
+        None: lambda _: chat_with_lm(llm, chain=schema.chain, model_name=llm_model_name),
+        "csv": lambda filepath: CsvService.read(target=filepath, row_id_key="uid", delimiter=args.csv_sep,
+                                                as_dict=True, skip_header=True, escapechar=args.csv_escape_char)
     }
 
     infer_modes = {
@@ -77,12 +90,13 @@ if __name__ == '__main__':
     }
 
     def optional_update_data_records(c, data):
-        assert(isinstance(c, str))
+        assert (isinstance(c, str))
 
-        if c in schema_p2r:
+        if c in schema.p2r:
             data[c] = DataService.get_prompt_text(prompt=data[c]["prompt"], data_dict=data)
-        if c in schema_r2p:
-            p_column = schema_r2p[c]
+        if c in schema.r2p:
+            p_column = schema.r2p[c]
+            # This instruction takes a lot of time in a non-batching mode.
             data[c] = infer_modes[args.infer_mode](data[p_column])
 
         return data[c]
@@ -100,24 +114,9 @@ if __name__ == '__main__':
     llm_model_name = args.model.split(':')[-1]
     llm = find_by_prefix(d=models_preset, key=args.model.split(':')[0])()
 
-    schema_dict = JsonService.read_data(args.schema)
-
-    # Compose template to fill
-    schema_args = {}
-    schema_r2p = {}
-    schema_p2r = {}
-    d = schema_dict["schema"]
-    for i in range(len(d)):
-        r_col_name = d[i]["out"]
-        p_col_name = r_col_name + "_prompt"
-        schema_r2p[r_col_name] = p_col_name
-        schema_p2r[p_col_name] = r_col_name
-        schema_args[p_col_name] = d[i]
-        schema_args[r_col_name] = None
-
     # Input extension type defines the provider.
     src_filepath, src_ext, src_meta = parse_filepath(args.src)
-    queries_it = map(lambda data: data.update(schema_args) or data, input_providers[src_ext](src_filepath))
+    queries_it = map(lambda data: data.update(schema.cot_args) or data, input_providers[src_ext](src_filepath))
 
     # If this is not a chat mode, then we optionally wrap into limiter.
     if src_ext is not None:
@@ -131,7 +130,7 @@ if __name__ == '__main__':
     # In the case when both --to and --output parameters were not defined.
     tgt_ext = "sqlite" if tgt_ext is None else tgt_ext
 
-    actual_target = "".join(["_".join([join(DATA_DIR, basename(src_filepath)), llm.name()]), f".{tgt_ext}"]) \
+    actual_target = "".join(["_".join([join(DATA_DIR, basename(src_filepath)), llm.name(), schema.name]), f".{tgt_ext}"]) \
         if tgt_filepath is None else tgt_filepath
 
     # Provide output.

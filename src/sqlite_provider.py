@@ -16,8 +16,9 @@ class SQLiteProvider(object):
         cur.execute(f"CREATE INDEX IF NOT EXISTS i_id ON {table_name}({id_column_name})")
 
     @staticmethod
-    def write_auto(data_it, target, data2col_func, table_name, id_column_name="id"):
-        """ NOTE: data_it is a iterator of dictionaries.
+    def write_auto(data_it, target, data2col_func, table_name, id_column_name="id",
+                   id_column_type="INTEGER"):
+        """ NOTE: data_it is an iterator of dictionaries.
             This implementation automatically creates the table and
         """
         with sqlite3.connect(target) as con:
@@ -41,7 +42,7 @@ class SQLiteProvider(object):
 
                     SQLiteProvider.__create_table(
                         columns=columns, table_name=table_name, cur=cur,
-                        id_column_name=id_column_name, id_column_type="TEXT",
+                        id_column_name=id_column_name, id_column_type=id_column_type,
                         sqlite3_column_types=["TEXT"] * len(columns))
 
                 # Check that each rows satisfies criteria of the first row.
@@ -63,10 +64,16 @@ class SQLiteProvider(object):
 
     @staticmethod
     def read(target, column_names=None, table="content"):
-        print(f"Connecting: {target}")
         with sqlite3.connect(target) as conn:
             cursor = conn.cursor()
             cols = "*" if column_names is None else ",".join(column_names)
             cursor.execute(f"SELECT {cols} FROM {table}")
             for row in cursor:
                 yield row
+                
+    @staticmethod
+    def get_columns(target, table="content"):
+        with sqlite3.connect(target) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f"PRAGMA table_info({table})")
+            return [row[1] for row in cursor.fetchall()]

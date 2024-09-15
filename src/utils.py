@@ -23,8 +23,8 @@ def find_by_prefix(d, key):
     if len(matches) > 1:
         raise Exception(f"There are multiple entries that are related to `{key}`: {matches}")
     if len(matches) == 0:
-        raise Exception(f"No entries were found for `{key}`!")
-        
+        raise Exception(f"No entries were found for {key}!")
+
     return d[matches[0]]
 
 
