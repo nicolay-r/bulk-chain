@@ -3,7 +3,9 @@
 
 No-strings tiny **Chain-of-Thought framework** for your Large Language Model (LLM) that saves you time ⏰ and money 💰
 
-This applies sequence of prompts towards your data in `CSV`/`JSONL`/`sqlite` in order to expand table and export it:
+The end goal of this framework is to serve sequence of prompts formed into `schema` towards 
+towards LLM.
+It iterates through your data stored in `CSV`/`JSONL`/`sqlite`.
 
 ### Features
 * **Provides iterator over infinite amount of input contexts** served in `CSV`/`JSONL`.
@@ -12,7 +14,9 @@ This applies sequence of prompts towards your data in `CSV`/`JSONL`/`sqlite` in 
 
 # Installation
 
-> pip3 install -r dependencies.txt 
+```bash
+ pip3 install -r dependencies.txt 
+```
 
 # Usage
 
