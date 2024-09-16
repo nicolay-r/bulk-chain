@@ -1,4 +1,4 @@
-from src.lm.base import BaseLM
+from src.llm_base import BaseLM
 from src.utils import auto_import
 
 

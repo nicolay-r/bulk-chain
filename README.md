@@ -3,8 +3,7 @@
 
 No-strings tiny **Chain-of-Thought framework** for your Large Language Model (LLM) that saves you time ⏰ and money 💰
 
-The end goal of this framework is to serve sequence of prompts formed into `schema` towards 
-towards LLM.
+The end goal of this framework is to serve chain of prompts (a.k.a. Chain-of-Thought) formed into `schema` towards LLM.
 It iterates through your data stored in `CSV`/`JSONL`/`sqlite`.
 
 ### Features
@@ -14,8 +13,10 @@ It iterates through your data stored in `CSV`/`JSONL`/`sqlite`.
 
 # Installation
 
+> TODO: Work in progress. Use dependencies installation instead.
+
 ```bash
- pip3 install -r dependencies.txt 
+pip install git+https://github.com/nicolay-r/quick_cot
 ```
 
 # Usage
@@ -28,8 +29,8 @@ Just **two** simple steps:
 2. Launch inference:
 ```bash
 python infer.py \
-    --model "google/flan-t5-base" \
-    --schema "data/thor_cot_schema.json" \
+    --model "dynamic:ext/flan_t5.py:FlanT5" \
+    --schema "data/default.json" \
     --device "cpu" \
     --temp 0.1 \
     --output "data/output.csv" \

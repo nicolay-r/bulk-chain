@@ -4,24 +4,25 @@ import sys
 
 from os.path import join, basename
 
-from src.csv_service import CsvService
-from src.data_service import DataService
-from src.json_service import JsonService
-from src.llm_service import chat_with_lm
-from src.lm.openai_chatgpt import OpenAIGPT
-from src.schema_service import SchemaService
-from src.sqlite_provider import SQLiteProvider
+from src.provider_sqlite import SQLiteProvider
+from src.service_csv import CsvService
+from src.service_data import DataService
+from src.service_json import JsonService
+from src.service_llm import chat_with_lm
+from src.service_schema import SchemaService
 from src.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter, auto_import
 
-DATA_DIR = "."
+
+CWD = os.getcwd()
 
 
-def dynamic_init(class_filepath):
-    path_cwd = os.getcwd()
-    sys.path.append(path_cwd)
+def dynamic_init(class_filepath, class_name=None):
+    sys.path.append(CWD)
     class_path_list = class_filepath.split('/')
     class_path_list[-1] = '.'.join(class_path_list[-1].split('.')[:-1])
-    class_path = ".".join(class_path_list + [class_path_list[-1].title()])
+    class_name = class_path_list[-1].title() if class_name is None else class_name
+    class_path = ".".join(class_path_list + [class_name])
+    print(f"Dynamic loading for the file and class `{class_path}`")
     cls = auto_import(class_path, is_class=False)
     return cls
 
@@ -69,8 +70,7 @@ if __name__ == '__main__':
 
     # List of the Supported models and their API wrappers.
     models_preset = {
-        "openai": lambda: OpenAIGPT(api_key=args.api_token, model_name=llm_model_name, temp=args.temperature, max_tokens=args.max_length),
-        "dynamic": lambda: dynamic_init(class_filepath=llm_model_name)(**transformers_default_cfg)
+        "dynamic": lambda: dynamic_init(class_filepath=llm_model_name, class_name=llm_model_params)(**transformers_default_cfg)
     }
 
     input_providers = {
@@ -104,9 +104,11 @@ if __name__ == '__main__':
     }
 
     # Initialize LLM model.
-    llm_model_type = args.model.split(':')[0]
-    llm_model_name = args.model.split(':')[-1]
-    llm = find_by_prefix(d=models_preset, key=args.model.split(':')[0])()
+    params = args.model.split(':')
+    llm_model_type = params[0]
+    llm_model_name = params[1] if len(params) > 1 else params[-1]
+    llm_model_params = ':'.join(params[2:]) if len(params) > 2 else None
+    llm = find_by_prefix(d=models_preset, key=llm_model_type)()
 
     # Input extension type defines the provider.
     src_filepath, src_ext, src_meta = parse_filepath(args.src)
@@ -124,7 +126,7 @@ if __name__ == '__main__':
     # In the case when both --to and --output parameters were not defined.
     tgt_ext = "sqlite" if tgt_ext is None else tgt_ext
 
-    actual_target = "".join(["_".join([join(DATA_DIR, basename(src_filepath)), llm.name(), schema.name]), f".{tgt_ext}"]) \
+    actual_target = "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema.name]), f".{tgt_ext}"]) \
         if tgt_filepath is None else tgt_filepath
 
     # Provide output.

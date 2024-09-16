@@ -1,5 +1,5 @@
-from src.data_service import DataService
-from src.lm.base import BaseLM
+from src.llm_base import BaseLM
+from src.service_data import DataService
 from src.utils import iter_params
 
 

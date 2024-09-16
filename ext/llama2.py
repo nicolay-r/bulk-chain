@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.lm.base import BaseLM
+from src.llm_base import BaseLM
 
 
 class Llama2(BaseLM):

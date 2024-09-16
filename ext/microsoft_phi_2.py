@@ -1,7 +1,10 @@
+# This model requires:
+# einops==0.7.0
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.lm.base import BaseLM
+from src.llm_base import BaseLM
 
 
 class MicrosoftPhi2(BaseLM):

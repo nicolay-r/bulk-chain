@@ -1,11 +1,11 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.lm.base import BaseLM
+from src.llm_base import BaseLM
 from src.utils import auto_import
 
 
-class DeciLM(BaseLM):
+class Decilm(BaseLM):
 
     SYSTEM_PROMPT_TEMPLATE = """
         ### System:
@@ -21,7 +21,7 @@ class DeciLM(BaseLM):
             Source: https://huggingface.co/Deci/DeciLM-7B-instruct
             Note: Authors by default propose to pass Bits-And-Bytes config with 4Bit Quantization.
         """
-        super(DeciLM, self).__init__(name=model_name)
+        super(Decilm, self).__init__(name=model_name)
 
         if use_bf16:
             print("Warning: Experimental mode with bf-16!")
