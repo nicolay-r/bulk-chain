@@ -33,6 +33,13 @@ class Replicate(BaseLM):
                 "max_new_tokens": max_tokens,
                 "min_new_tokens": -1,
                 "prompt_template": Replicate.LLaMA3_instruct_prompt_template
+            },
+            "meta/meta-llama-3.1-405b-instruct": {
+                "top_k": top_k,
+                "temperature": temp,
+                "max_new_tokens": max_tokens,
+                "min_new_tokens": -1,
+                "prompt_template": Replicate.LLaMA3_instruct_prompt_template
             }
         }
 
