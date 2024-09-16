@@ -1,4 +1,6 @@
 import argparse
+import os
+import sys
 
 from os.path import join, basename
 
@@ -6,19 +8,22 @@ from src.csv_service import CsvService
 from src.data_service import DataService
 from src.json_service import JsonService
 from src.llm_service import chat_with_lm
-from src.lm.decilm import DeciLM
-from src.lm.flan_t5 import FlanT5
-from src.lm.gemma import Gemma
-from src.lm.llama2 import Llama2
-from src.lm.microsoft_phi_2 import MicrosoftPhi2
-from src.lm.mistral import Mistral
 from src.lm.openai_chatgpt import OpenAIGPT
 from src.schema_service import SchemaService
 from src.sqlite_provider import SQLiteProvider
-from src.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter
-
+from src.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter, auto_import
 
 DATA_DIR = "."
+
+
+def dynamic_init(class_filepath):
+    path_cwd = os.getcwd()
+    sys.path.append(path_cwd)
+    class_path_list = class_filepath.split('/')
+    class_path_list[-1] = '.'.join(class_path_list[-1].split('.')[:-1])
+    class_path = ".".join(class_path_list + [class_path_list[-1].title()])
+    cls = auto_import(class_path, is_class=False)
+    return cls
 
 
 if __name__ == '__main__':
@@ -35,7 +40,7 @@ if __name__ == '__main__':
     parser.add_argument('--temp', dest='temperature', type=float, default=0.1)
     parser.add_argument('--output', dest='output', type=str, default=None)
     parser.add_argument('--max-length', dest='max_length', type=int, default=None)
-    parser.add_argument('--api-token', dest='api_key', type=str, default=None)
+    parser.add_argument('--api-token', dest='api_token', type=str, default=None)
     parser.add_argument('--limit', dest='limit', type=int, default=None,
                         help="Limit amount of source texts for prompting.")
     parser.add_argument('--limit-prompt', dest="limit_prompt", type=int, default=None,
@@ -56,27 +61,15 @@ if __name__ == '__main__':
     transformers_default_cfg = {
         "temp": args.temperature,
         "max_length": args.max_length,
-        "token": args.api_key,
+        "api_token": args.api_token,
         "use_bf16": args.use_bf16,
         "device": args.device
     }
 
     # List of the Supported models and their API wrappers.
     models_preset = {
-        "google/gemma": lambda: Gemma(model_name=llm_model_name, temp=args.temperature, max_length=args.max_length,
-                                      token=args.api_key, use_bf16=args.use_bf16, device=args.device),
-        "microsoft/phi-2": lambda: MicrosoftPhi2(model_name=llm_model_name, max_length=args.max_length,
-                                                 device=args.device, use_bf16=args.use_bf16),
-        "mistralai/Mistral": lambda: Mistral(model_name=llm_model_name, temp=args.temperature,
-                                             max_length=args.max_length, device=args.device, use_bf16=args.use_bf16),
-        "google/flan-t5": lambda: FlanT5(model_name=llm_model_name, temp=args.temperature,
-                                         max_length=args.max_length, device=args.device, use_bf16=args.use_bf16),
-        "meta-llama/Llama-2": lambda: Llama2(model_name=llm_model_name, temp=args.temperature,
-                                             max_length=args.max_length, device=args.device, use_bf16=args.use_bf16),
-        "Deci/DeciLM-7B-instruct": lambda: DeciLM(model_name=llm_model_name, temp=args.temperature,
-                                                  device=args.device, use_bf16=args.use_bf16, load_in_4bit=args.load_in_4b),
-        "openai": lambda: OpenAIGPT(api_key=args.api_token,
-                                    model_name=llm_model_name, temp=args.temperature, max_tokens=args.max_length),
+        "openai": lambda: OpenAIGPT(api_key=args.api_token, model_name=llm_model_name, temp=args.temperature, max_tokens=args.max_length),
+        "dynamic": lambda: dynamic_init(class_filepath=llm_model_name)(**transformers_default_cfg)
     }
 
     input_providers = {
