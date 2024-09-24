@@ -1,6 +1,6 @@
 import unittest
 
-from src.utils import iter_params
+from fast_cot.core.utils import iter_params
 
 
 class TestArgumentsSeeking(unittest.TestCase):

@@ -4,7 +4,7 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.llm_base import BaseLM
+from fast_cot.core.llm_base import BaseLM
 
 
 class MicrosoftPhi2(BaseLM):

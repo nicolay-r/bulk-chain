@@ -1,5 +1,5 @@
-from src.llm_base import BaseLM
-from src.utils import auto_import
+from fast_cot.core.llm_base import BaseLM
+from fast_cot.core.utils import auto_import
 
 
 class Replicate(BaseLM):

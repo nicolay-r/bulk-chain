@@ -1,6 +1,6 @@
-from src.llm_base import BaseLM
-from src.service_data import DataService
-from src.utils import iter_params
+from fast_cot.core.llm_base import BaseLM
+from fast_cot.core.service_data import DataService
+from fast_cot.core.utils import iter_params
 
 
 def pad_str(text, pad):

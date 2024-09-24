@@ -1,4 +1,4 @@
-from src.utils import iter_params
+from fast_cot.core.utils import iter_params
 
 
 class DataService(object):

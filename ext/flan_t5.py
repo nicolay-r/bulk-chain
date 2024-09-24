@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoTokenizer, T5ForConditionalGeneration
 
-from src.llm_base import BaseLM
+from fast_cot.core.llm_base import BaseLM
 
 
 class FlanT5(BaseLM):

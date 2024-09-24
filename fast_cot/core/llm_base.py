@@ -1,4 +1,4 @@
-from src.utils import format_model_name
+from fast_cot.core.utils import format_model_name
 
 
 class BaseLM(object):
