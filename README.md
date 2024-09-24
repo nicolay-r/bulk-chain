@@ -21,7 +21,7 @@ pip install git+https://github.com/nicolay-r/fast-cot@master
 
 # Usage
 
-Just **two** simple steps:
+Just **three** simple steps:
 
 1. Define your sequence of prompts with their dependencies
    * **For example:** [Three-hop-Reasoning in Implicit CoT](https://arxiv.org/pdf/2305.11255.pdf) for sentiment analysis at 
@@ -37,12 +37,7 @@ Just **two** simple steps:
 
 3. Launch inference:
 ```bash
-python infer.py \
-    --model "dynamic:flan_t5.py:FlanT5" \
-    --schema "default.json" \
-    --device "cpu" \
-    --temp 0.1 \
-    --output "data/output.csv"
+python infer.py --model "dynamic:flan_t5.py:FlanT5" --schema "default.json" --device "cpu" --temp 0.1
 ```
 
 ## Implement your model
