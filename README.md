@@ -13,8 +13,6 @@ It iterates through your data stored in `CSV`/`JSONL`/`sqlite`.
 
 # Installation
 
-> TODO: Work in progress. Use dependencies installation instead.
-
 ```bash
 pip install git+https://github.com/nicolay-r/fast-cot@master
 ```
