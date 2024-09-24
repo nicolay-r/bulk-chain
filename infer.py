@@ -4,13 +4,13 @@ import sys
 
 from os.path import join, basename
 
-from src.provider_sqlite import SQLiteProvider
-from src.service_csv import CsvService
-from src.service_data import DataService
-from src.service_json import JsonService
-from src.service_llm import chat_with_lm
-from src.service_schema import SchemaService
-from src.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter, auto_import
+from fast_cot.provider_sqlite import SQLiteProvider
+from fast_cot.service_csv import CsvService
+from fast_cot.service_data import DataService
+from fast_cot.service_json import JsonService
+from fast_cot.service_llm import chat_with_lm
+from fast_cot.service_schema import SchemaService
+from fast_cot.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter, auto_import
 
 
 CWD = os.getcwd()

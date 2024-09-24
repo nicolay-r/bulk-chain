@@ -1,4 +1,4 @@
-# quick_cot
+# fast-cot
 ![](https://img.shields.io/badge/Python-3.9-brightgreen.svg)
 
 No-strings tiny **Chain-of-Thought framework** for your Large Language Model (LLM) that saves you time ⏰ and money 💰
@@ -16,7 +16,7 @@ It iterates through your data stored in `CSV`/`JSONL`/`sqlite`.
 > TODO: Work in progress. Use dependencies installation instead.
 
 ```bash
-pip install git+https://github.com/nicolay-r/quick_cot
+pip install git+https://github.com/nicolay-r/fast-cot
 ```
 
 # Usage
