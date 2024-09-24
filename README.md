@@ -1,15 +1,17 @@
 # fast-cot
 ![](https://img.shields.io/badge/Python-3.9-brightgreen.svg)
 
-No-strings tiny **Chain-of-Thought framework** for your Large Language Model (LLM) that saves you time ⏰ and money 💰
+No-strings tiny **[Chain-of-Thought](https://arxiv.org/abs/2201.11903) framework** for your Large Language Model (LLM) that saves you time ⏰ and money 💰
 
-The end goal of this framework is to serve chain of prompts (a.k.a. Chain-of-Thought) formed into `schema` towards LLM.
+The end goal of this framework is to serve chain of prompts (a.k.a. [Chain-of-Thought](https://arxiv.org/abs/2201.11903)) 
+formed into `schema` towards LLM.
 It iterates through your data stored in `CSV`/`JSONL`/`sqlite`.
 
 ### Features
-* **Provides iterator over infinite amount of input contexts** served in `CSV`/`JSONL`.
-* **Caching progress**: withstanding exception during LLM calls by using `sqlite3` engine for caching LLM answers;
-* **Support schemas descriptions** for Chain-of-Thought concept.
+* ✅ **No-strings**: you're free to LLM dependencies and flexible `venv` customization.
+* ✅ **Provides iterator over infinite amount of input contexts** served in `CSV`/`JSONL`.
+* ✅ **Progress caching**: withstanding exception during LLM calls by using `sqlite3` engine for caching LLM answers;
+* ✅ **Support schemas descriptions** for Chain-of-Thought concept.
 
 # Installation
 
