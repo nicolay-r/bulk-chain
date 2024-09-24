@@ -25,12 +25,12 @@ Just **two** simple steps:
 
 1. Define your sequence of prompts with their dependencies
    * **For example:** [Three-hop-Reasoning in Implicit CoT](https://arxiv.org/pdf/2305.11255.pdf) for sentiment analysis at 
-     [`data/thor_cot_schema.json`](/data/thor_cot_schema.json)
+     [`ext/schema/thor_cot_schema.json`](/ext/schema/thor_cot_schema.json)
 2. Launch inference:
 ```bash
 python infer.py \
     --model "dynamic:ext/flan_t5.py:FlanT5" \
-    --schema "data/default.json" \
+    --schema "default.json" \
     --device "cpu" \
     --temp 0.1 \
     --output "data/output.csv" \
