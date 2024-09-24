@@ -26,10 +26,15 @@ Just **two** simple steps:
 1. Define your sequence of prompts with their dependencies
    * **For example:** [Three-hop-Reasoning in Implicit CoT](https://arxiv.org/pdf/2305.11255.pdf) for sentiment analysis at 
      [`ext/schema/thor_cot_schema.json`](/ext/schema/thor_cot_schema.json)
-2. Fetch or write your own `schema.json` and **model**:
+   * Or fetch  
+    ```bash
+    !wget https://raw.githubusercontent.com/nicolay-r/fast-cot/refs/heads/master/ext/schema/default.json
+    ```
+2. Fetch or write your own **model**:
 ```bash
-!wget https://raw.githubusercontent.com/nicolay-r/fast-cot/refs/heads/master/ext/schema/default.json
+!wget https://raw.githubusercontent.com/nicolay-r/fast-cot/refs/heads/master/ext/flan_t5.py
 ```
+
 3. Launch inference:
 ```bash
 python infer.py \
