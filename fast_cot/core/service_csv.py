@@ -1,7 +1,5 @@
 import csv
 
-from tqdm import tqdm
-
 
 class CsvService:
 
@@ -32,7 +30,7 @@ class CsvService:
 
         header = None
         with open(target, newline='\n') as f:
-            for row_id, row in tqdm(enumerate(csv.reader(f, **csv_kwargs)), desc="Reading CSV"):
+            for row_id, row in enumerate(csv.reader(f, **csv_kwargs)):
                 if skip_header and row_id == 0:
                     header = ([row_id_key] if row_id_key is not None else []) + row
                     continue

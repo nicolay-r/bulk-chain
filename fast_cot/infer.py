@@ -2,6 +2,8 @@ import argparse
 import os
 import sys
 
+from tqdm import tqdm
+
 from os.path import join, basename
 
 from fast_cot.core.provider_sqlite import SQLiteProvider
@@ -96,8 +98,8 @@ if __name__ == '__main__':
         return data[c]
 
     output_providers = {
-        "sqlite": lambda filepath, table_name: SQLiteProvider.write_auto(
-            data_it=queries_it, target=filepath,
+        "sqlite": lambda filepath, table_name, data_it: SQLiteProvider.write_auto(
+            data_it=data_it, target=filepath,
             data2col_func=optional_update_data_records,
             table_name=handle_table_name(table_name if table_name is not None else "contents"),
             id_column_name="uid")
@@ -130,4 +132,4 @@ if __name__ == '__main__':
         if tgt_filepath is None else tgt_filepath
 
     # Provide output.
-    output_providers[tgt_ext](actual_target, tgt_meta)
+    output_providers[tgt_ext](actual_target, tgt_meta, data_it=tqdm(queries_it, desc="Iter content"))
