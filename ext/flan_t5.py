@@ -6,7 +6,7 @@ from fast_cot.core.llm_base import BaseLM
 
 class FlanT5(BaseLM):
 
-    def __init__(self, model_name="google/flan-t5-xl", temp=0.1, device='cuda', max_length=None, use_bf16=False, **kwargs):
+    def __init__(self, model_name="google/flan-t5-base", temp=0.1, device='cuda', max_length=None, use_bf16=False, **kwargs):
         super(FlanT5, self).__init__(name=model_name)
         self.__device = device
         self.__max_length = 512 if max_length is None else max_length
