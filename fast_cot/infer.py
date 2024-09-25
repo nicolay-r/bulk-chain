@@ -33,7 +33,7 @@ def dynamic_init(class_filepath, class_name=None):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Infer Instruct LLM inference based on CoT schema")
-    parser.add_argument('--model', dest='model', type=str, default=None)
+    parser.add_argument('--adapter', dest='adapter', type=str, default=None)
     parser.add_argument('--src', dest='src', type=str, default=None)
     parser.add_argument('--schema', dest='schema', type=str, default=None,
                         help="Path to the JSON file that describes schema")
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     }
 
     # Initialize LLM model.
-    params = args.model.split(':')
+    params = args.adapter.split(':')
     llm_model_type = params[0]
     llm_model_name = params[1] if len(params) > 1 else params[-1]
     llm_model_params = ':'.join(params[2:]) if len(params) > 2 else None

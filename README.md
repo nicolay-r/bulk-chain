@@ -60,7 +60,7 @@ Just **three** simple steps:
 ```bash
 python infer.py \
     --schema "default.json" \
-    --model "dynamic:flan_t5.py:FlanT5" \
+    --adapter "dynamic:flan_t5.py:FlanT5" \
     %% \
     --device "cpu" \
     --temp 0.1
