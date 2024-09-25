@@ -7,6 +7,7 @@ from tqdm import tqdm
 from os.path import join, basename
 
 from fast_cot.core.provider_sqlite import SQLiteProvider
+from fast_cot.core.service_args import CmdArgsService
 from fast_cot.core.service_csv import CsvService
 from fast_cot.core.service_data import DataService
 from fast_cot.core.service_json import JsonService
@@ -36,25 +37,20 @@ if __name__ == '__main__':
     parser.add_argument('--src', dest='src', type=str, default=None)
     parser.add_argument('--schema', dest='schema', type=str, default=None,
                         help="Path to the JSON file that describes schema")
-    parser.add_argument('--device', dest='device', type=str, default='cuda')
     parser.add_argument('--csv-sep', dest='csv_sep', type=str, default='\t')
     parser.add_argument('--csv-escape-char', dest='csv_escape_char', type=str, default=None)
     parser.add_argument('--infer-mode', dest='infer_mode', type=str, default='default')
     parser.add_argument('--to', dest='to', type=str, default=None, choices=["csv", "sqlite"])
-    parser.add_argument('--temp', dest='temperature', type=float, default=0.1)
     parser.add_argument('--output', dest='output', type=str, default=None)
     parser.add_argument('--max-length', dest='max_length', type=int, default=None)
-    parser.add_argument('--api-token', dest='api_token', type=str, default=None)
     parser.add_argument('--limit', dest='limit', type=int, default=None,
                         help="Limit amount of source texts for prompting.")
     parser.add_argument('--limit-prompt', dest="limit_prompt", type=int, default=None,
                         help="Optional trimming prompt by the specified amount of characters.")
-    parser.add_argument('--bf16', dest="use_bf16", action='store_true', default=False,
-                        help='Initializing Flan-T5 with torch.bfloat16')
-    parser.add_argument('--l4b', dest="load_in_4b", action='store_true', default=False,
-                        help='Use 4B Quantization based on Bits-and-Bytes library API')
 
-    args = parser.parse_args()
+    native_args, model_args = CmdArgsService.partition_list(lst=sys.argv, sep="%%")
+
+    args = parser.parse_args(args=native_args[1:])
 
     # Setup prompt.
     schema = SchemaService(json_data=JsonService.read_data(args.schema))
@@ -62,17 +58,11 @@ if __name__ == '__main__':
     if schema is not None:
         print(f"Using schema: {schema.name}")
 
-    transformers_default_cfg = {
-        "temp": args.temperature,
-        "max_length": args.max_length,
-        "api_token": args.api_token,
-        "use_bf16": args.use_bf16,
-        "device": args.device
-    }
+    model_kwargs = CmdArgsService.args_to_dict(model_args)
 
     # List of the Supported models and their API wrappers.
     models_preset = {
-        "dynamic": lambda: dynamic_init(class_filepath=llm_model_name, class_name=llm_model_params)(**transformers_default_cfg)
+        "dynamic": lambda: dynamic_init(class_filepath=llm_model_name, class_name=llm_model_params)(**model_kwargs)
     }
 
     input_providers = {

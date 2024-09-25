@@ -56,10 +56,14 @@ Just **three** simple steps:
 !wget https://raw.githubusercontent.com/nicolay-r/fast-cot/refs/heads/master/ext/flan_t5.py
 ```
 
-3. Launch inference:
+3. Launch inference in (chat mode):
 ```bash
-python infer.py --model "dynamic:flan_t5.py:FlanT5" \
-      --schema "default.json" --device "cpu" --temp 0.1
+python infer.py \
+    --schema "default.json" \
+    --model "dynamic:flan_t5.py:FlanT5" \
+    %% \
+    --device "cpu" \
+    --temp 0.1
 ```
 
 # Embed your LLM
