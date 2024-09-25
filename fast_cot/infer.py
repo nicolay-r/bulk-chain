@@ -66,7 +66,8 @@ if __name__ == '__main__':
     input_providers = {
         None: lambda _: chat_with_lm(llm, chain=schema.chain, model_name=llm_model_name),
         "csv": lambda filepath: CsvService.read(target=filepath, row_id_key="uid", delimiter=args.csv_sep,
-                                                as_dict=True, skip_header=True, escapechar=args.csv_escape_char)
+                                                as_dict=True, skip_header=True, escapechar=args.csv_escape_char),
+        "jsonl": lambda filepath: JsonService.read_lines(src=filepath, row_id_key="uid")
     }
 
     infer_modes = {
@@ -95,7 +96,10 @@ if __name__ == '__main__':
 
     output_providers = {
         "csv": lambda filepath, data_it, header:
-            CsvService.write_handled(target=filepath, data_it=data_it, header=header, data2col_func=lambda v: list(v))
+            CsvService.write_handled(target=filepath, data_it=data_it, header=header, data2col_func=lambda v: list(v)),
+        "jsonl": lambda filepath, data_it, header:
+            JsonService.write_lines(target=filepath,
+                                    data_it=map(lambda item: {key:item[i] for i, key in enumerate(header)}, data_it))
     }
 
     # Initialize LLM model.
