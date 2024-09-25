@@ -39,7 +39,6 @@ if __name__ == '__main__':
                         help="Path to the JSON file that describes schema")
     parser.add_argument('--csv-sep', dest='csv_sep', type=str, default='\t')
     parser.add_argument('--csv-escape-char', dest='csv_escape_char', type=str, default=None)
-    parser.add_argument('--infer-mode', dest='infer_mode', type=str, default='default')
     parser.add_argument('--to', dest='to', type=str, default=None, choices=["csv", "sqlite"])
     parser.add_argument('--output', dest='output', type=str, default=None)
     parser.add_argument('--max-length', dest='max_length', type=int, default=None)
@@ -83,7 +82,7 @@ if __name__ == '__main__':
         if c in schema.r2p:
             p_column = schema.r2p[c]
             # This instruction takes a lot of time in a non-batching mode.
-            data[c] = infer_modes[args.infer_mode](data[p_column])
+            data[c] = infer_modes["default"](data[p_column])
 
         return data[c]
 
