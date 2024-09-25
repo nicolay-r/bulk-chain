@@ -41,7 +41,6 @@ if __name__ == '__main__':
     parser.add_argument('--csv-escape-char', dest='csv_escape_char', type=str, default=None)
     parser.add_argument('--to', dest='to', type=str, default=None, choices=["csv", "sqlite"])
     parser.add_argument('--output', dest='output', type=str, default=None)
-    parser.add_argument('--max-length', dest='max_length', type=int, default=None)
     parser.add_argument('--limit', dest='limit', type=int, default=None,
                         help="Limit amount of source texts for prompting.")
     parser.add_argument('--limit-prompt', dest="limit_prompt", type=int, default=None,
