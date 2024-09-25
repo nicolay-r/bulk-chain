@@ -114,11 +114,16 @@ if __name__ == '__main__':
 
     # Input extension type defines the provider.
     src_filepath, src_ext, src_meta = parse_filepath(args.src)
-    queries_it = map(lambda data: data.update(schema.cot_args) or data, input_providers[src_ext](src_filepath))
 
-    # If this is not a chat mode, then we optionally wrap into limiter.
-    if src_ext is not None:
-        queries_it = optional_limit_iter(it_data=queries_it, limit=args.limit)
+    # Check whether we are in chat mode.
+    if src_ext is None:
+        input_providers[src_ext](None)
+        exit(0)
+
+    # We optionally wrap into limiter.
+    queries_it = optional_limit_iter(
+        it_data=map(lambda data: data.update(schema.cot_args) or data, input_providers[src_ext](src_filepath)),
+        limit=args.limit)
 
     # Setup output.
     args.output = args.output.format(model=llm.name()) if args.output is not None else args.output
