@@ -85,12 +85,17 @@ if __name__ == '__main__':
 
         return data[c]
 
-    output_providers = {
+    cache_providers = {
         "sqlite": lambda filepath, table_name, data_it: SQLiteProvider.write_auto(
             data_it=data_it, target=filepath,
             data2col_func=optional_update_data_records,
             table_name=handle_table_name(table_name if table_name is not None else "contents"),
             id_column_name="uid")
+    }
+
+    output_providers = {
+        "csv": lambda filepath, data_it, header:
+            CsvService.write_handled(target=filepath, data_it=data_it, header=header, data2col_func=lambda v: list(v))
     }
 
     # Initialize LLM model.
@@ -117,12 +122,20 @@ if __name__ == '__main__':
     args.output = args.output.format(model=llm.name()) if args.output is not None else args.output
     tgt_filepath, tgt_ext, tgt_meta = parse_filepath(args.output, default_ext=args.to)
 
-    # We may still not decided the result extension so then assign the default one.
-    # In the case when both --to and --output parameters were not defined.
-    tgt_ext = "sqlite" if tgt_ext is None else tgt_ext
+    cache_ext = "sqlite"
 
-    actual_target = "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema.name]), f".{tgt_ext}"]) \
+    cache_target = "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema.name]), f".{cache_ext}"]) \
         if tgt_filepath is None else tgt_filepath
 
-    # Provide output.
-    output_providers[tgt_ext](actual_target, tgt_meta, data_it=tqdm(queries_it, desc="Iter content"))
+    # Provide data caching.
+    cache_providers[cache_ext](cache_target, table_name=tgt_meta, data_it=tqdm(queries_it, desc="Iter content"))
+
+    # Export cached data.
+    tgt_ext = src_ext if tgt_ext is None else tgt_ext
+    target = "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema.name]), f".{tgt_ext}"]) \
+        if tgt_filepath is None else tgt_filepath
+    cache_table = handle_table_name(tgt_meta if tgt_meta is not None else "contents")
+    output_providers[tgt_ext](
+        filepath=target,
+        data_it=SQLiteProvider.read(cache_target, table=cache_table),
+        header=SQLiteProvider.get_columns(target=cache_target, table=cache_table))

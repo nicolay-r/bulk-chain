@@ -15,11 +15,11 @@ class CsvService:
     def write_handled(target, data_it, data2col_func, header):
 
         def __it():
-            yield ["row_id"] + header
-            for row_id, data in data_it:
+            yield header
+            for data in data_it:
                 content = data2col_func(data)
                 assert(len(content) == len(header))
-                yield [row_id] + content
+                yield content
 
         CsvService.write(target, lines_it=__it())
 
