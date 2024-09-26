@@ -1,5 +1,8 @@
 # fast-cot
 ![](https://img.shields.io/badge/Python-3.9-brightgreen.svg)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nicolay-r/fast-cot/blob/master/fast_cot_tutorial.ipynb)
+
+
 
 No-strings tiny **[Chain-of-Thought](https://arxiv.org/abs/2201.11903) framework** for your Large Language Model (LLM) that saves you time ⏰ and money 💰
 
