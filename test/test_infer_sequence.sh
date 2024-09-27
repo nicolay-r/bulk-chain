@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 export PYTHONPATH=$PYTHONPATH:../
 python ../fast_cot/infer.py \
     --src "data/sample.jsonl" \
