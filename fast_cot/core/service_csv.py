@@ -1,4 +1,8 @@
 import csv
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 class CsvService:
@@ -6,7 +10,7 @@ class CsvService:
     @staticmethod
     def write(target, lines_it):
         f = open(target, "w")
-        print(f"Saving: {target}")
+        logger.info(f"Saving: {target}")
         w = csv.writer(f, delimiter="\t", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for content in lines_it:
             w.writerow(content)

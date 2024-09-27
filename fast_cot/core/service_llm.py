@@ -1,6 +1,11 @@
+import logging
+
 from fast_cot.core.llm_base import BaseLM
 from fast_cot.core.service_data import DataService
 from fast_cot.core.utils import iter_params
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 def pad_str(text, pad):
@@ -31,7 +36,7 @@ def chat_with_lm(lm, chain=None, model_name=None):
 
     while not do_exit:
 
-        print("----------------")
+        logger.info("----------------")
 
         # Launching the CoT engine loop.
         data_dict = {}
@@ -65,13 +70,13 @@ def chat_with_lm(lm, chain=None, model_name=None):
 
             # Returning meta information, passed to LLM.
             pad = 4
-            print(pad_str(f"{model_name} (ask) ->", pad=pad))
-            print(nice_output(actual_prompt, pad=pad*2, remove_new_line=True, width=80))
+            logger.info(pad_str(f"{model_name} (ask) ->", pad=pad))
+            logger.info(nice_output(actual_prompt, pad=pad*2, remove_new_line=True, width=80))
 
             # Response.
             response = lm.ask(actual_prompt)
-            print(pad_str(f"{model_name} (resp)->", pad=pad))
-            print(nice_output(response, pad=pad*2, remove_new_line=False, width=80))
+            logger.info(pad_str(f"{model_name} (resp)->", pad=pad))
+            logger.info(nice_output(response, pad=pad*2, remove_new_line=False, width=80))
 
             # Collecting the answer for the next turn.
             data_dict[prompt_args["out"]] = response

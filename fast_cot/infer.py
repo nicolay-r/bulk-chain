@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import sys
 
@@ -15,6 +16,10 @@ from fast_cot.core.service_llm import chat_with_lm
 from fast_cot.core.service_schema import SchemaService
 from fast_cot.core.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter, auto_import, \
     dynamic_init
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
 
 CWD = os.getcwd()
 
@@ -43,7 +48,7 @@ if __name__ == '__main__':
     schema = SchemaService(json_data=JsonService.read_data(args.schema))
 
     if schema is not None:
-        print(f"Using schema: {schema.name}")
+        logger.info(f"Using schema: {schema.name}")
 
     model_kwargs = CmdArgsService.args_to_dict(model_args)
 
