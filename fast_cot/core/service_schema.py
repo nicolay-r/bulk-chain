@@ -22,6 +22,9 @@ class SchemaService(object):
             r_col_name = prompt["out"]
             p_col_name = r_col_name + "_prompt" if "in" not in prompt else prompt["in"]
 
+            assert r_col_name not in schema_r2p, f"`{r_col_name}` has been already declared!"
+            assert p_col_name not in schema_p2r, f"`{p_col_name}` has been already declared!"
+
             schema_r2p[r_col_name] = p_col_name
             schema_p2r[p_col_name] = r_col_name
             schema_args[p_col_name] = prompt
