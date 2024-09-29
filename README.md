@@ -14,7 +14,7 @@ It allows applying series of prompts formed into `schema` (See [related section]
 # Installation
 
 ```bash
-pip install git+https://github.com/nicolay-r/bulk-chain@master
+pip install bulk-chain==0.24.0 
 ```
 
 ## Chain-of-Thought Schema
