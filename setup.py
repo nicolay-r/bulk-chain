@@ -17,7 +17,8 @@ setup(
     name='bulk_chain',
     version='0.24.0',
     python_requires=">=3.6",
-    description='No-strings tiny Chain-of-Thought framework for your LLM that saves you time',
+    description='A lightweight, no-strings-attached Chain-of-Thought framework for your LLM, '
+                'ensuring reliable results for bulk input requests.',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/nicolay-r/bulk-chain',

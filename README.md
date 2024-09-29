@@ -2,13 +2,8 @@
 ![](https://img.shields.io/badge/Python-3.9-brightgreen.svg)
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nicolay-r/bulk-chain/blob/master/bulk_chain_tutorial.ipynb)
 
-
-
-No-strings tiny **[Chain-of-Thought](https://arxiv.org/abs/2201.11903) framework** for your Large Language Model (LLM) that saves you time ⏰ and money 💰
-
-The end goal of this framework is to serve chain of prompts (a.k.a. [Chain-of-Thought](https://arxiv.org/abs/2201.11903)) 
-formed into `schema` towards LLM.
-It iterates through your data stored in `CSV`/`JSONL`/`sqlite`.
+A lightweight, no-strings-attached **[Chain-of-Thought](https://arxiv.org/abs/2201.11903) framework** for your LLM, ensuring reliable results for bulk input requests stored in `CSV` / `JSONL` / `sqlite`.
+It allows applying series of prompts formed into `schema` (See [related section](#chain-of-thought-schema))
 
 ### Features
 * ✅ **No-strings**: you're free to LLM dependencies and flexible `venv` customization.
