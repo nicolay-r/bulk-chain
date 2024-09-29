@@ -7,16 +7,15 @@ from tqdm import tqdm
 
 from os.path import join, basename
 
-from fast_cot.core.llm_base import BaseLM
-from fast_cot.core.provider_sqlite import SQLiteProvider
-from fast_cot.core.service_args import CmdArgsService
-from fast_cot.core.service_csv import CsvService
-from fast_cot.core.service_data import DataService
-from fast_cot.core.service_json import JsonService
-from fast_cot.core.service_llm import chat_with_lm
-from fast_cot.core.service_schema import SchemaService
-from fast_cot.core.utils import find_by_prefix, parse_filepath, handle_table_name, optional_limit_iter, \
-    dynamic_init
+from bulk_chain.core.llm_base import BaseLM
+from bulk_chain.core.provider_sqlite import SQLiteProvider
+from bulk_chain.core.service_args import CmdArgsService
+from bulk_chain.core.service_csv import CsvService
+from bulk_chain.core.service_data import DataService
+from bulk_chain.core.service_json import JsonService
+from bulk_chain.core.service_llm import chat_with_lm
+from bulk_chain.core.service_schema import SchemaService
+from bulk_chain.core.utils import dynamic_init, find_by_prefix, handle_table_name, optional_limit_iter, parse_filepath
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

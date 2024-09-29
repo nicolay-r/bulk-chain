@@ -1,6 +1,6 @@
-# fast-cot
+# bulk-chain
 ![](https://img.shields.io/badge/Python-3.9-brightgreen.svg)
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nicolay-r/fast-cot/blob/master/fast_cot_tutorial.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nicolay-r/bulk-chain/blob/master/bulk_chain_tutorial.ipynb)
 
 
 
@@ -19,7 +19,7 @@ It iterates through your data stored in `CSV`/`JSONL`/`sqlite`.
 # Installation
 
 ```bash
-pip install git+https://github.com/nicolay-r/fast-cot@master
+pip install git+https://github.com/nicolay-r/bulk-chain@master
 ```
 
 ## Chain-of-Thought Schema
@@ -52,16 +52,16 @@ Just **three** simple steps:
 
 1. Define your [CoT Schema](#chain-of-thought-schema), or fetch it as shown below:
 ```bash
-!wget https://raw.githubusercontent.com/nicolay-r/fast-cot/refs/heads/master/ext/schema/default.json
+!wget https://raw.githubusercontent.com/nicolay-r/bulk-chain/refs/heads/master/ext/schema/default.json
 ```
 2. Fetch or write your own **model** or pick the one [preset here](/ext/):
 ```bash
-!wget https://raw.githubusercontent.com/nicolay-r/fast-cot/refs/heads/master/ext/flan_t5.py
+!wget https://raw.githubusercontent.com/nicolay-r/bulk-chain/refs/heads/master/ext/flan_t5.py
 ```
 
 3. Launch inference in (chat mode):
 ```bash
-python infer.py \
+!python -m bulk_chain.infer \
     --schema "default.json" \
     --adapter "dynamic:flan_t5.py:FlanT5" \
     %% \

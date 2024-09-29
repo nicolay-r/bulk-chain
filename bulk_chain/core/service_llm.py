@@ -1,8 +1,8 @@
 import logging
 
-from fast_cot.core.llm_base import BaseLM
-from fast_cot.core.service_data import DataService
-from fast_cot.core.utils import iter_params
+from bulk_chain.core.llm_base import BaseLM
+from bulk_chain.core.service_data import DataService
+from bulk_chain.core.utils import iter_params
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

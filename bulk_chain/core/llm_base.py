@@ -1,4 +1,4 @@
-from fast_cot.core.utils import format_model_name
+from bulk_chain.core.utils import format_model_name
 
 
 class BaseLM(object):

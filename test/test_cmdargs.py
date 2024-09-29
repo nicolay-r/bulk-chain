@@ -1,5 +1,5 @@
 import sys
-from fast_cot.core.service_args import CmdArgsService
+from bulk_chain.core.service_args import CmdArgsService
 
 
 print(sys.argv)
