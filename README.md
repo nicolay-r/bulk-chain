@@ -2,6 +2,10 @@
 ![](https://img.shields.io/badge/Python-3.9-brightgreen.svg)
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nicolay-r/bulk-chain/blob/master/bulk_chain_tutorial.ipynb)
 
+<p align="center">
+    <img src="logo.png"/>
+</p>
+
 A lightweight, no-strings-attached **[Chain-of-Thought](https://arxiv.org/abs/2201.11903) framework** for your LLM, ensuring reliable results for bulk input requests stored in `CSV` / `JSONL` / `sqlite`.
 It allows applying series of prompts formed into `schema` (See [related section](#chain-of-thought-schema))
 
