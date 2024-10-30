@@ -11,9 +11,9 @@ class SQLiteProvider(object):
         sqlite3_column_types = [id_column_type] + sqlite3_column_types
 
         # Compose the whole columns list.
-        content = ", ".join([" ".join(item) for item in zip(columns, sqlite3_column_types)])
+        content = ", ".join([f"[{item[0]}] {item[1]}" for item in zip(columns, sqlite3_column_types)])
         cur.execute(f"CREATE TABLE IF NOT EXISTS {table_name}({content})")
-        cur.execute(f"CREATE INDEX IF NOT EXISTS i_id ON {table_name}({id_column_name})")
+        cur.execute(f"CREATE INDEX IF NOT EXISTS [{id_column_name}] ON {table_name}([{id_column_name}])")
 
     @staticmethod
     def write_auto(data_it, target, data2col_func, table_name, id_column_name="id",
@@ -49,13 +49,13 @@ class SQLiteProvider(object):
                 [Exception(f"{column} is expected to be in row!") for column in row_columns if column not in columns]
 
                 uid = data[id_column_name]
-                r = cur.execute(f"SELECT EXISTS(SELECT 1 FROM {table_name} WHERE {id_column_name}='{uid}');")
+                r = cur.execute(f"SELECT EXISTS(SELECT 1 FROM {table_name} WHERE [{id_column_name}]='{uid}');")
                 ans = r.fetchone()[0]
                 if ans == 1:
                     continue
 
                 params = ", ".join(tuple(['?'] * (len(columns))))
-                row_columns_str = ", ".join(row_columns)
+                row_columns_str = ", ".join([f"[{col}]" for col in row_columns])
                 cur.execute(f"INSERT INTO {table_name}({row_columns_str}) VALUES ({params})",
                             [data2col_func(c, data) for c in row_columns])
                 con.commit()

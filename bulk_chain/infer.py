@@ -48,7 +48,7 @@ def init_schema(json_filepath):
     return SchemaService(json_data=JsonService.read_data(json_filepath))
 
 
-def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table):
+def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table, id_column_name):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
@@ -79,7 +79,7 @@ def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table):
             data_it=data_it, target=filepath,
             data2col_func=optional_update_data_records,
             table_name=handle_table_name(table_name if table_name is not None else "contents"),
-            id_column_name="uid")
+            id_column_name=id_column_name)
     }
 
     # We optionally wrap into limiter.
@@ -97,11 +97,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Infer Instruct LLM inference based on CoT schema")
     parser.add_argument('--adapter', dest='adapter', type=str, default=None)
+    parser.add_argument('--id-col', dest='id_col', type=str, default="uid")
     parser.add_argument('--src', dest='src', type=str, default=None)
     parser.add_argument('--schema', dest='schema', type=str, default=None,
                         help="Path to the JSON file that describes schema")
-    parser.add_argument('--csv-sep', dest='csv_sep', type=str, default='\t')
-    parser.add_argument('--csv-escape-char', dest='csv_escape_char', type=str, default=None)
     parser.add_argument('--to', dest='to', type=str, default=None, choices=["csv", "sqlite"])
     parser.add_argument('--output', dest='output', type=str, default=None)
     parser.add_argument('--limit', dest='limit', type=int, default=None,
@@ -114,7 +113,8 @@ if __name__ == '__main__':
     args = parser.parse_args(args=native_args[1:])
 
     # Initialize Large Language Model.
-    llm, llm_model_name = init_llm(**CmdArgsService.args_to_dict(model_args))
+    model_args_dict = CmdArgsService.args_to_dict(model_args)
+    llm, llm_model_name = init_llm(**model_args_dict)
 
     # Setup schema.
     schema = init_schema(args.schema)
@@ -123,9 +123,11 @@ if __name__ == '__main__':
 
     input_providers = {
         None: lambda _: chat_with_lm(llm, chain=schema.chain, model_name=llm_model_name),
-        "csv": lambda filepath: CsvService.read(target=filepath, row_id_key="uid", delimiter=args.csv_sep,
-                                                as_dict=True, skip_header=True, escapechar=args.csv_escape_char),
-        "jsonl": lambda filepath: JsonService.read_lines(src=filepath, row_id_key="uid")
+        "csv": lambda filepath: CsvService.read(target=filepath, row_id_key=args.id_col,
+                                                as_dict=True, skip_header=True,
+                                                delimiter=model_args_dict.get("delimiter", "\t"),
+                                                escapechar=model_args_dict.get("escapechar", None)),
+        "jsonl": lambda filepath: JsonService.read_lines(src=filepath, row_id_key=args.id_col)
     }
 
     output_providers = {
@@ -156,6 +158,7 @@ if __name__ == '__main__':
     data_it = iter_content(input_dicts_iter=input_providers[src_ext](src_filepath),
                            schema=schema,
                            llm=llm,
+                           id_column_name=args.id_col,
                            cache_target=cache_target,
                            cache_table=cache_table)
 
