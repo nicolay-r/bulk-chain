@@ -1,4 +1,4 @@
-# bulk-chain
+# bulk-chain 0.24.1
 ![](https://img.shields.io/badge/Python-3.9-brightgreen.svg)
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nicolay-r/bulk-chain/blob/master/bulk_chain_tutorial.ipynb)
 [![twitter](https://img.shields.io/twitter/url/https/shields.io.svg?style=social)](https://x.com/nicolayr_/status/1847969224636961033)
@@ -19,7 +19,7 @@ It allows applying series of prompts formed into `schema` (See [related section]
 # Installation
 
 ```bash
-pip install bulk-chain==0.24.0 
+pip install bulk-chain
 ```
 
 ## Chain-of-Thought Schema
