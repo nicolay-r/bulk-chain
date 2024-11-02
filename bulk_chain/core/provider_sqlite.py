@@ -63,11 +63,10 @@ class SQLiteProvider(object):
             cur.close()
 
     @staticmethod
-    def read(target, column_names=None, table="content"):
+    def iter_rows(target, table="content"):
         with sqlite3.connect(target) as conn:
             cursor = conn.cursor()
-            cols = "*" if column_names is None else ",".join(column_names)
-            cursor.execute(f"SELECT {cols} FROM {table}")
+            cursor.execute(f"SELECT * FROM {table}")
             for row in cursor:
                 yield row
                 

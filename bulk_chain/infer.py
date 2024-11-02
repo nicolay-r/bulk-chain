@@ -90,7 +90,7 @@ def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table, id_co
     # Provide data caching.
     cache_providers["sqlite"](cache_target, table_name=tgt_meta, data_it=tqdm(queries_it, desc="Iter content"))
 
-    return SQLiteProvider.read(cache_target, table=cache_table)
+    return SQLiteProvider.iter_rows(cache_target, table=cache_table)
 
 
 if __name__ == '__main__':
