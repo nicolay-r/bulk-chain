@@ -1,16 +1,18 @@
+import os
+from os.path import join, basename
+
 import argparse
 import logging
-import os
 import sys
 
 from tqdm import tqdm
 
-from os.path import join, basename
+from source_iter.service_csv import CsvService
+from source_iter.service_jsonl import JsonlService
+from source_iter.service_sqlite import SQLite3Service
 
 from bulk_chain.core.llm_base import BaseLM
-from bulk_chain.core.provider_sqlite import SQLiteProvider
 from bulk_chain.core.service_args import CmdArgsService
-from bulk_chain.core.service_csv import CsvService
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_llm import chat_with_lm
@@ -45,7 +47,7 @@ def init_llm(**model_kwargs):
 
 
 def init_schema(json_filepath):
-    return SchemaService(json_data=JsonService.read_data(json_filepath))
+    return SchemaService(json_data=JsonService.read(json_filepath))
 
 
 def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table, id_column_name):
@@ -75,7 +77,7 @@ def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table, id_co
         return data[c]
 
     cache_providers = {
-        "sqlite": lambda filepath, table_name, data_it: SQLiteProvider.write_auto(
+        "sqlite": lambda filepath, table_name, data_it: SQLite3Service.write_missed(
             data_it=data_it, target=filepath,
             data2col_func=optional_update_data_records,
             table_name=handle_table_name(table_name if table_name is not None else "contents"),
@@ -90,7 +92,7 @@ def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table, id_co
     # Provide data caching.
     cache_providers["sqlite"](cache_target, table_name=tgt_meta, data_it=tqdm(queries_it, desc="Iter content"))
 
-    return SQLiteProvider.iter_rows(cache_target, table=cache_table)
+    return SQLite3Service.read(cache_target, table=cache_table)
 
 
 if __name__ == '__main__':
@@ -123,19 +125,19 @@ if __name__ == '__main__':
 
     input_providers = {
         None: lambda _: chat_with_lm(llm, chain=schema.chain, model_name=llm_model_name),
-        "csv": lambda filepath: CsvService.read(target=filepath, row_id_key=args.id_col,
+        "csv": lambda filepath: CsvService.read(src=filepath, row_id_key=args.id_col,
                                                 as_dict=True, skip_header=True,
                                                 delimiter=model_args_dict.get("delimiter", "\t"),
                                                 escapechar=model_args_dict.get("escapechar", None)),
-        "jsonl": lambda filepath: JsonService.read_lines(src=filepath, row_id_key=args.id_col)
+        "jsonl": lambda filepath: JsonlService.read(src=filepath, row_id_key=args.id_col)
     }
 
     output_providers = {
         "csv": lambda filepath, data_it, header:
-        CsvService.write_handled(target=filepath, data_it=data_it, header=header, data2col_func=lambda v: list(v)),
+            CsvService.write(target=filepath, data_it=data_it, header=header, it_type=None),
         "jsonl": lambda filepath, data_it, header:
-        JsonService.write_lines(target=filepath,
-                                data_it=map(lambda item: {key:item[i] for i, key in enumerate(header)}, data_it))
+        JsonlService.write(target=filepath,
+                           data_it=map(lambda item: {key: item[i] for i, key in enumerate(header)}, data_it))
     }
 
     # Setup output.
@@ -170,4 +172,4 @@ if __name__ == '__main__':
     # Perform output writing process.
     output_providers[tgt_ext](filepath=output_target,
                               data_it=data_it,
-                              header=SQLiteProvider.get_columns(target=cache_target, table=cache_table))
+                              header=SQLite3Service.read_columns(target=cache_target, table=cache_table))
