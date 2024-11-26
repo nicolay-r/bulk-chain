@@ -4,9 +4,6 @@ from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.utils import iter_params
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-
 
 def pad_str(text, pad):
     return text.rjust(len(text) + pad, ' ')
@@ -27,9 +24,12 @@ def nice_output(text, width, pad=4, remove_new_line=False):
 
 
 def chat_with_lm(lm, chain=None, model_name=None):
-    assert(isinstance(lm, BaseLM))
-    assert(isinstance(chain, list))
-    assert(isinstance(model_name, str) or model_name is None)
+    assert (isinstance(lm, BaseLM))
+    assert (isinstance(chain, list))
+    assert (isinstance(model_name, str) or model_name is None)
+
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
 
     do_exit = False
     model_name = model_name if model_name is not None else "agent"
@@ -74,7 +74,7 @@ def chat_with_lm(lm, chain=None, model_name=None):
             logger.info(nice_output(actual_prompt, pad=pad*2, remove_new_line=True, width=80))
 
             # Response.
-            response = lm.ask(actual_prompt)
+            response = lm.ask_safe(actual_prompt)
             logger.info(pad_str(f"{model_name} (resp)->", pad=pad))
             logger.info(nice_output(response, pad=pad*2, remove_new_line=False, width=80))
 
