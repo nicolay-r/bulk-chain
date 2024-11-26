@@ -1,3 +1,5 @@
+import logging
+
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.utils import auto_import
 
@@ -43,7 +45,8 @@ class Replicate(BaseLM):
             }
         }
 
-    def __init__(self, model_name="meta/meta-llama-3-70b-instruct", temp=0.1, max_tokens=512, api_token=None, **kwargs):
+    def __init__(self, model_name="meta/meta-llama-3-70b-instruct", temp=0.1, max_tokens=512, api_token=None,
+                 suppress_httpx_log=True, **kwargs):
         super(Replicate, self).__init__(model_name)
         self.r_model_name = model_name
 
@@ -55,6 +58,10 @@ class Replicate(BaseLM):
         self.settings = all_settings[model_name]
         client = auto_import("replicate.Client", is_class=False)
         self.client = client(api_token=api_token)
+
+        if suppress_httpx_log:
+            httpx_logger = logging.getLogger("httpx")
+            httpx_logger.setLevel(logging.WARNING)
 
     def ask(self, prompt):
 
