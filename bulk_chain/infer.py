@@ -61,7 +61,7 @@ def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table, id_co
     assert (isinstance(cache_table, str))
 
     infer_modes = {
-        "default": lambda prompt: llm.ask(prompt[:args.limit_prompt] if args.limit_prompt is not None else prompt)
+        "default": lambda prompt: llm.ask_safe(prompt[:args.limit_prompt] if args.limit_prompt is not None else prompt)
     }
 
     def optional_update_data_records(c, data):
@@ -99,6 +99,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Infer Instruct LLM inference based on CoT schema")
     parser.add_argument('--adapter', dest='adapter', type=str, default=None)
+    parser.add_argument('--attempts', dest='attempts', type=int, default=None)
     parser.add_argument('--id-col', dest='id_col', type=str, default="uid")
     parser.add_argument('--src', dest='src', type=str, default=None)
     parser.add_argument('--schema', dest='schema', type=str, default=None,
@@ -115,7 +116,7 @@ if __name__ == '__main__':
     args = parser.parse_args(args=native_args[1:])
 
     # Initialize Large Language Model.
-    model_args_dict = CmdArgsService.args_to_dict(model_args)
+    model_args_dict = CmdArgsService.args_to_dict(model_args) | {"attempts": args.attempts}
     llm, llm_model_name = init_llm(**model_args_dict)
 
     # Setup schema.
