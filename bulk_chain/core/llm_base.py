@@ -6,7 +6,7 @@ from bulk_chain.core.utils import format_model_name
 
 class BaseLM(object):
 
-    def __init__(self, name, attempts=None, delay_sec=1, enable_log=True):
+    def __init__(self, name, attempts=None, delay_sec=1, enable_log=True, **kwargs):
         self.__name = name
         self.__attempts = 1 if attempts is None else attempts
         self.__delay_sec = delay_sec
