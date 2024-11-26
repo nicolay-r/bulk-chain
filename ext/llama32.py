@@ -7,8 +7,8 @@ from bulk_chain.core.llm_base import BaseLM
 class Llama32(BaseLM):
 
     def __init__(self, model_name="meta-llama/Llama-3.2-3B-Instruct", api_token=None,
-                 temp=0.1, device='cuda', max_length=256, use_bf16=False):
-        super(Llama32, self).__init__(name=model_name)
+                 temp=0.1, device='cuda', max_length=256, use_bf16=False, **kwargs):
+        super(Llama32, self).__init__(name=model_name, **kwargs)
 
         if use_bf16:
             print("Warning: Experimental mode with bf-16!")

@@ -7,7 +7,7 @@ from bulk_chain.core.llm_base import BaseLM
 class FlanT5(BaseLM):
 
     def __init__(self, model_name="google/flan-t5-base", temp=0.1, device='cuda', max_length=None, use_bf16=False, **kwargs):
-        super(FlanT5, self).__init__(name=model_name)
+        super(FlanT5, self).__init__(name=model_name, **kwargs)
         self.__device = device
         self.__max_length = 512 if max_length is None else max_length
         self.__model = T5ForConditionalGeneration.from_pretrained(

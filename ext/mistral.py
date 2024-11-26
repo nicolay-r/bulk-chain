@@ -7,9 +7,9 @@ from bulk_chain.core.llm_base import BaseLM
 class Mistral(BaseLM):
 
     def __init__(self, model_name="mistralai/Mistral-7B-Instruct-v0.1", temp=0.1, device='cuda', max_length=None,
-                 use_bf16=False):
+                 use_bf16=False, **kwargs):
         assert(isinstance(max_length, int) or max_length is None)
-        super(Mistral, self).__init__(name=model_name)
+        super(Mistral, self).__init__(name=model_name, **kwargs)
 
         if use_bf16:
             print("Warning: Experimental mode with bf-16!")

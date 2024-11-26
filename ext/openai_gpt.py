@@ -5,9 +5,9 @@ from bulk_chain.core.utils import auto_import
 class OpenAIGPT(BaseLM):
 
     def __init__(self, api_key, model_name="gpt-4-1106-preview", temp=0.1, max_tokens=None, assistant_prompt=None,
-                 freq_penalty=0.0, kwargs=None):
+                 freq_penalty=0.0, **kwargs):
         assert(isinstance(assistant_prompt, str) or assistant_prompt is None)
-        super(OpenAIGPT, self).__init__(name=model_name)
+        super(OpenAIGPT, self).__init__(name=model_name, **kwargs)
 
         # dynamic import of the OpenAI library.
         OpenAI = auto_import("openai._client.OpenAI", is_class=False)
