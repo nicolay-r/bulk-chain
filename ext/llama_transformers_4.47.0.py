@@ -1,6 +1,7 @@
+# This code has been tested under transformers==4.47.0
+
 import torch
 from transformers import pipeline
-
 from bulk_chain.core.llm_base import BaseLM
 
 
@@ -29,4 +30,4 @@ class Llama32(BaseLM):
             [{"role": "user", "content": prompt}],
             max_new_tokens=self.__max_length,
         )
-        return (outputs[0]["generated_text"][-1]) 
+        return outputs[0]["generated_text"][-1]["content"]
