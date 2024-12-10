@@ -22,6 +22,7 @@ class Llama32(BaseLM):
             torch_dtype=torch.bfloat16 if use_bf16 else "auto",
             device_map="auto",
             temperature=temp,
+            pad_token_id=128001,
             token=api_token
         )
 
