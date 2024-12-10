@@ -111,11 +111,16 @@ if __name__ == '__main__':
     parser.add_argument('--limit-prompt', dest="limit_prompt", type=int, default=None,
                         help="Optional trimming prompt by the specified amount of characters.")
 
-    native_args, model_args = CmdArgsService.partition_list(lst=sys.argv, sep="%%")
-
+    # Extract native arguments.
+    native_args = CmdArgsService.extract_native_args(sys.argv, end_prefix="%%")
     args = parser.parse_args(args=native_args[1:])
 
-    # Initialize Large Language Model.
+    # Extract csv-related arguments.
+    csv_args = CmdArgsService.find_grouped_args(lst=sys.argv, starts_with="%%csv", end_prefix="%%")
+    csv_args_dict = CmdArgsService.args_to_dict(csv_args)
+
+    # Extract model-related arguments and Initialize Large Language Model.
+    model_args = CmdArgsService.find_grouped_args(lst=sys.argv, starts_with="%%m", end_prefix="%%")
     model_args_dict = CmdArgsService.args_to_dict(model_args) | {"attempts": args.attempts}
     llm, llm_model_name = init_llm(**model_args_dict)
 
@@ -128,8 +133,8 @@ if __name__ == '__main__':
         None: lambda _: chat_with_lm(llm, chain=schema.chain, model_name=llm_model_name),
         "csv": lambda filepath: CsvService.read(src=filepath, row_id_key=args.id_col,
                                                 as_dict=True, skip_header=True,
-                                                delimiter=model_args_dict.get("delimiter", "\t"),
-                                                escapechar=model_args_dict.get("escapechar", None)),
+                                                delimiter=csv_args_dict.get("delimiter", "\t"),
+                                                escapechar=csv_args_dict.get("escapechar", None)),
         "jsonl": lambda filepath: JsonlService.read(src=filepath, row_id_key=args.id_col)
     }
 

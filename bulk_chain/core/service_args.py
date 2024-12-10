@@ -33,14 +33,33 @@ class CmdArgsService:
             yield __release()
 
     @staticmethod
-    def partition_list(lst, sep):
+    def __find_suffix_ind(lst, idx_from, end_prefix):
+        for i in range(idx_from, len(lst)):
+            if lst[i].startswith(end_prefix):
+                return i
+        return len(lst)
+
+    @staticmethod
+    def extract_native_args(lst, end_prefix):
+        return lst[:CmdArgsService.__find_suffix_ind(lst, idx_from=0, end_prefix=end_prefix)]
+
+    @staticmethod
+    def find_grouped_args(lst, starts_with, end_prefix):
         """Slices a list in two, cutting on index matching "sep"
         """
-        if sep in lst:
-            idx = lst.index(sep)
-            return (lst[:idx], lst[idx+1:])
-        else:
-            return (lst[:], None)
+
+        # Checking the presence of starts_with.
+        # We have to return empty content in the case of absence starts_with in the lst.
+        if starts_with not in lst:
+            return []
+
+        # Assigning start index.
+        idx_from = lst.index(starts_with) + 1
+
+        # Assigning end index.
+        idx_to = CmdArgsService.__find_suffix_ind(lst, idx_from=idx_from, end_prefix=end_prefix)
+
+        return lst[idx_from:idx_to]
 
     @staticmethod
     def args_to_dict(args):

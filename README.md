@@ -64,7 +64,7 @@ Just **three** simple steps:
 !python -m bulk_chain.infer \
     --schema "default.json" \
     --adapter "dynamic:flan_t5.py:FlanT5" \
-    %% \
+    %%m \
     --device "cpu" \
     --temp 0.1
 ```

@@ -22,9 +22,6 @@ class OpenAIGPT(BaseLM):
         self.__freq_penalty = freq_penalty
         self.__kwargs = {} if kwargs is None else kwargs
 
-        if "delimiter" in self.__kwargs:
-            del self.__kwargs["delimiter"]
-
         if suppress_httpx_log:
             httpx_logger = logging.getLogger("httpx")
             httpx_logger.setLevel(logging.WARNING)
