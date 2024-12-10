@@ -21,9 +21,10 @@ class BaseLM(object):
             try:
                 response = self.ask(prompt)
                 return response
-            except:
+            except Exception as e:
                 if self.__logger is not None:
                     self.__logger.info("Unable to infer the result. Try {} out of {}.".format(i, self.__attempts))
+                    self.__logger.info(e)
                 time.sleep(self.__delay_sec)
 
         raise Exception("Can't infer")
