@@ -26,6 +26,23 @@ logging.basicConfig(level=logging.INFO)
 CWD = os.getcwd()
 
 
+INFER_MODES = {
+    "default": lambda llm, prompt, limit_prompt=None: llm.ask_safe(
+        prompt[:limit_prompt] if limit_prompt is not None else prompt)
+}
+
+
+WRITER_PROVIDERS = {
+    "sqlite": lambda filepath, table_name, data_it, **kwargs: SQLite3Service.write_missed(
+        data_it=data_it, target=filepath, table_name=table_name, **kwargs)
+}
+
+
+READER_PROVIDERS = {
+    "sqlite": lambda filepath, table_name: SQLite3Service.read(filepath, table=table_name)
+}
+
+
 def init_llm(**model_kwargs):
     """ This method perform dynamic initialization of LLM from third-party resource.
     """
@@ -50,49 +67,51 @@ def init_schema(json_filepath):
     return SchemaService(json_data=JsonService.read(json_filepath))
 
 
-def iter_content(input_dicts_iter, llm, schema, cache_target, cache_table, id_column_name):
+def optional_update_data_records(c, data, schema, infer_func):
+    assert (isinstance(c, str))
+
+    if c in schema.p2r:
+        data[c] = DataService.get_prompt_text(prompt=data[c]["prompt"], data_dict=data)
+    if c in schema.r2p:
+        p_column = schema.r2p[c]
+        # This instruction takes a lot of time in a non-batching mode.
+        data[c] = infer_func(data[p_column])
+
+    return data[c]
+
+
+def iter_content(input_dicts_it, llm, schema, cache_target=None, limit_prompt=None, **cache_kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
     """
     assert (isinstance(llm, BaseLM))
     assert (isinstance(schema, SchemaService))
-    assert (isinstance(cache_target, str))
-    assert (isinstance(cache_table, str))
+    assert (isinstance(cache_target, str) or cache_target is None)
 
-    infer_modes = {
-        "default": lambda prompt: llm.ask_safe(prompt[:args.limit_prompt] if args.limit_prompt is not None else prompt)
-    }
+    def __handle_query(data_record):
+        for c in data_record.keys():
+            optional_update_data_records(c=c, data=data_record, schema=schema,
+                                         infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt))
+        return data_record
 
-    def optional_update_data_records(c, data):
-        assert (isinstance(c, str))
+    # Provide schema COT args.
+    queries_it = map(lambda data: data.update(schema.cot_args) or data, input_dicts_it)
 
-        if c in schema.p2r:
-            data[c] = DataService.get_prompt_text(prompt=data[c]["prompt"], data_dict=data)
-        if c in schema.r2p:
-            p_column = schema.r2p[c]
-            # This instruction takes a lot of time in a non-batching mode.
-            data[c] = infer_modes["default"](data[p_column])
+    # Return generator of already handled requests.
+    handled_it = (__handle_query(q) for q in queries_it)
 
-        return data[c]
+    if cache_target is None:
+        return handled_it
 
-    cache_providers = {
-        "sqlite": lambda filepath, table_name, data_it: SQLite3Service.write_missed(
-            data_it=data_it, target=filepath,
-            data2col_func=optional_update_data_records,
-            table_name=handle_table_name(table_name if table_name is not None else "contents"),
-            id_column_name=id_column_name)
-    }
-
-    # We optionally wrap into limiter.
-    queries_it = optional_limit_iter(
-        it_data=map(lambda data: data.update(schema.cot_args) or data, input_dicts_iter),
-        limit=args.limit)
-
-    # Provide data caching.
-    cache_providers["sqlite"](cache_target, table_name=tgt_meta, data_it=tqdm(queries_it, desc="Iter content"))
-
-    return SQLite3Service.read(cache_target, table=cache_table)
+    # Parse target.
+    cache_filepath, _, cache_table = parse_filepath(filepath=cache_target)
+    # Perform caching first.
+    WRITER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table,
+                               data_it=tqdm(handled_it, desc="Iter content"),
+                               **cache_kwargs)
+    # Then retrieve data.
+    return READER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table)
 
 
 if __name__ == '__main__':
@@ -158,24 +177,29 @@ if __name__ == '__main__':
         input_providers[src_ext](None)
         exit(0)
 
+    def default_output_file_template(ext):
+        # This is a default template for output files to be generated.
+        return "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema.name]), ext])
+
     # Setup cache target as well as the related table.
-    cache_target = "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema.name]), f".sqlite"]) \
-        if tgt_filepath is None else tgt_filepath
+    cache_filepath = default_output_file_template(".sqlite") if tgt_filepath is None else tgt_filepath
     cache_table = handle_table_name(tgt_meta if tgt_meta is not None else "contents")
 
-    data_it = iter_content(input_dicts_iter=input_providers[src_ext](src_filepath),
+    # This is a content that we extracted via input provider.
+    it_data = input_providers[src_ext](src_filepath)
+
+    data_it = iter_content(input_dicts_it=optional_limit_iter(it_data=it_data, limit=args.limit),
+                           limit_prompt=args.limit_prompt,
                            schema=schema,
                            llm=llm,
                            id_column_name=args.id_col,
-                           cache_target=cache_target,
-                           cache_table=cache_table)
+                           cache_target=":".join([cache_filepath, cache_table]))
 
     # Setup output target
     tgt_ext = src_ext if tgt_ext is None else tgt_ext
-    output_target = "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema.name]), f".{tgt_ext}"]) \
-        if tgt_filepath is None else tgt_filepath
+    output_target = default_output_file_template(f".{tgt_ext}") if tgt_filepath is None else tgt_filepath
 
     # Perform output writing process.
     output_providers[tgt_ext](filepath=output_target,
                               data_it=data_it,
-                              header=SQLite3Service.read_columns(target=cache_target, table=cache_table))
+                              header=SQLite3Service.read_columns(target=cache_filepath, table=cache_table))
