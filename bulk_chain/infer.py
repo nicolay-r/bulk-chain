@@ -33,8 +33,9 @@ INFER_MODES = {
 
 
 WRITER_PROVIDERS = {
-    "sqlite": lambda filepath, table_name, data_it, **kwargs: SQLite3Service.write_missed(
-        data_it=data_it, target=filepath, table_name=table_name, **kwargs)
+    "sqlite": lambda filepath, table_name, data_it, infer_data_func, **kwargs: SQLite3Service.write(
+        data_it=data_it, target=filepath, table_name=table_name, data2col_func=infer_data_func,
+        skip_existed=True, **kwargs)
 }
 
 
@@ -89,8 +90,9 @@ def iter_content(input_dicts_it, llm, schema, cache_target=None, limit_prompt=No
     assert (isinstance(schema, SchemaService))
     assert (isinstance(cache_target, str) or cache_target is None)
 
-    def __handle_query(data_record):
-        for c in data_record.keys():
+    def __infer_query(data_record, cols=None):
+        cols = data_record.keys() if cols is None else cols
+        for c in cols:
             optional_update_data_records(c=c, data=data_record, schema=schema,
                                          infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt))
         return data_record
@@ -98,17 +100,15 @@ def iter_content(input_dicts_it, llm, schema, cache_target=None, limit_prompt=No
     # Provide schema COT args.
     queries_it = map(lambda data: data.update(schema.cot_args) or data, input_dicts_it)
 
-    # Return generator of already handled requests.
-    handled_it = (__handle_query(q) for q in queries_it)
-
     if cache_target is None:
-        return handled_it
+        return (__infer_query(q) for q in queries_it)
 
     # Parse target.
     cache_filepath, _, cache_table = parse_filepath(filepath=cache_target)
     # Perform caching first.
     WRITER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table,
-                               data_it=tqdm(handled_it, desc="Iter content"),
+                               data_it=tqdm(queries_it, desc="Iter content"),
+                               infer_data_func=lambda c, query: __infer_query(query, cols=[c])[c],
                                **cache_kwargs)
     # Then retrieve data.
     return READER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table)
