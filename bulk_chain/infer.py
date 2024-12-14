@@ -152,14 +152,26 @@ if __name__ == '__main__':
         None: lambda _: chat_with_lm(llm, chain=schema.chain, model_name=llm_model_name),
         "csv": lambda filepath: CsvService.read(src=filepath, row_id_key=args.id_col,
                                                 as_dict=True, skip_header=True,
+                                                delimiter=csv_args_dict.get("delimiter", ","),
+                                                escapechar=csv_args_dict.get("escapechar", None)),
+        "tsv": lambda filepath: CsvService.read(src=filepath, row_id_key=args.id_col,
+                                                as_dict=True, skip_header=True,
                                                 delimiter=csv_args_dict.get("delimiter", "\t"),
                                                 escapechar=csv_args_dict.get("escapechar", None)),
         "jsonl": lambda filepath: JsonlService.read(src=filepath, row_id_key=args.id_col)
     }
 
     output_providers = {
-        "csv": lambda filepath, data_it, header:
-            CsvService.write(target=filepath, data_it=data_it, header=header, it_type=None),
+        "csv": lambda filepath, data_it, header: CsvService.write(target=filepath,
+                                                                  data_it=data_it, header=header,
+                                                                  delimiter=csv_args_dict.get("delimiter", ","),
+                                                                  escapechar=csv_args_dict.get("escapechar", None),
+                                                                  it_type=None),
+        "tsv": lambda filepath, data_it, header: CsvService.write(target=filepath,
+                                                                  data_it=data_it, header=header,
+                                                                  delimiter=csv_args_dict.get("delimiter", "\t"),
+                                                                  escapechar=csv_args_dict.get("escapechar", None),
+                                                                  it_type=None),
         "jsonl": lambda filepath, data_it, header:
         JsonlService.write(target=filepath,
                            data_it=map(lambda item: {key: item[i] for i, key in enumerate(header)}, data_it))
