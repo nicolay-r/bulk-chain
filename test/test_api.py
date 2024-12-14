@@ -12,9 +12,11 @@ class TestAPI(unittest.TestCase):
 
     def test(self):
         data_it = iter_content(input_dicts_it=self.it_data(20),
-                               llm=Replicate(model_name="meta/meta-llama-3-8b-instruct", api_token="<API-TOKEN>"),
-                               cache_target="out.sqlite:content",
+                               llm=Replicate(model_name="meta/meta-llama-3-8b-instruct",
+                                             api_token="<API-TOKEN>"),
                                schema="../ext/schema/default.json",
+                               # Cache-related extra parameters.
+                               cache_target="out.sqlite:content",
                                id_column_name="ind")
 
         for data in data_it:
