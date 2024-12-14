@@ -87,8 +87,14 @@ def iter_content(input_dicts_it, llm, schema, cache_target=None, limit_prompt=No
         the given `schema`
     """
     assert (isinstance(llm, BaseLM))
-    assert (isinstance(schema, SchemaService))
+    assert (isinstance(schema, (SchemaService, str, dict)))
     assert (isinstance(cache_target, str) or cache_target is None)
+
+    # Quick initialization of the schema.
+    if isinstance(schema, str):
+        schema = JsonService.read(schema)
+    if isinstance(schema, dict):
+        schema = SchemaService(json_data=schema)
 
     def __infer_query(data_record, cols=None):
         cols = data_record.keys() if cols is None else cols
