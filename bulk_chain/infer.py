@@ -68,26 +68,51 @@ def init_schema(json_filepath):
     return SchemaService(json_data=JsonService.read(json_filepath))
 
 
-def optional_update_data_records(c, data, schema, infer_func):
+def optional_update_data_records(c, data_record, schema, infer_func):
     assert (isinstance(c, str))
 
     if c in schema.p2r:
-        data[c] = DataService.get_prompt_text(prompt=data[c]["prompt"], data_dict=data)
+        data_record[c] = DataService.get_prompt_text(prompt=data_record[c]["prompt"], data_dict=data_record)
     if c in schema.r2p:
         p_column = schema.r2p[c]
         # This instruction takes a lot of time in a non-batching mode.
-        data[c] = infer_func(data[p_column])
+        data_record[c] = infer_func(data_record[p_column])
 
-    return data[c]
+    return data_record[c]
 
 
-def iter_content(input_dicts_it, llm, schema, cache_target=None, limit_prompt=None, **cache_kwargs):
+def infer_query(data_record, schema, infer_func, cols=None):
+    assert (callable(infer_func))
+
+    cols = data_record.keys() if cols is None else cols
+    for c in cols:
+        optional_update_data_records(c=c, data_record=data_record, schema=schema, infer_func=infer_func)
+    return data_record
+
+
+def iter_content(input_dicts_it, llm, schema, limit_prompt=None):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
     """
     assert (isinstance(llm, BaseLM))
-    assert (isinstance(schema, (SchemaService, str, dict)))
+
+    # Quick initialization of the schema.
+    if isinstance(schema, str):
+        schema = JsonService.read(schema)
+    if isinstance(schema, dict):
+        schema = SchemaService(json_data=schema)
+
+    queries_it = map(lambda data: data.update(schema.cot_args) or data, input_dicts_it)
+
+    return (infer_query(data_record=q,
+                        infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt),
+                        schema=schema)
+            for q in queries_it)
+
+
+def iter_content_cached(input_dicts_it, llm, schema, limit_prompt=None, cache_target=None, **cache_kwargs):
+    assert (isinstance(llm, BaseLM))
     assert (isinstance(cache_target, str) or cache_target is None)
 
     # Quick initialization of the schema.
@@ -96,26 +121,22 @@ def iter_content(input_dicts_it, llm, schema, cache_target=None, limit_prompt=No
     if isinstance(schema, dict):
         schema = SchemaService(json_data=schema)
 
-    def __infer_query(data_record, cols=None):
-        cols = data_record.keys() if cols is None else cols
-        for c in cols:
-            optional_update_data_records(c=c, data=data_record, schema=schema,
-                                         infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt))
-        return data_record
-
-    # Provide schema COT args.
+    # Iterator of the queries.
     queries_it = map(lambda data: data.update(schema.cot_args) or data, input_dicts_it)
-
-    if cache_target is None:
-        return (__infer_query(q) for q in queries_it)
 
     # Parse target.
     cache_filepath, _, cache_table = parse_filepath(filepath=cache_target)
+
     # Perform caching first.
-    WRITER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table,
-                               data_it=tqdm(queries_it, desc="Iter content"),
-                               infer_data_func=lambda c, query: __infer_query(query, cols=[c])[c],
-                               **cache_kwargs)
+    WRITER_PROVIDERS["sqlite"](
+        filepath=cache_filepath, table_name=cache_table,
+        data_it=tqdm(queries_it, desc="Iter content"),
+        infer_data_func=lambda c, query: infer_query(
+            query, cols=[c],
+            infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt),
+            schema=schema)[c],
+        **cache_kwargs)
+
     # Then retrieve data.
     return READER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table)
 
@@ -206,12 +227,12 @@ if __name__ == '__main__':
     # This is a content that we extracted via input provider.
     it_data = input_providers[src_ext](src_filepath)
 
-    data_it = iter_content(input_dicts_it=optional_limit_iter(it_data=it_data, limit=args.limit),
-                           limit_prompt=args.limit_prompt,
-                           schema=schema,
-                           llm=llm,
-                           id_column_name=args.id_col,
-                           cache_target=":".join([cache_filepath, cache_table]))
+    data_it = iter_content_cached(input_dicts_it=optional_limit_iter(it_data=it_data, limit=args.limit),
+                                  limit_prompt=args.limit_prompt,
+                                  schema=schema,
+                                  llm=llm,
+                                  id_column_name=args.id_col,
+                                  cache_target=":".join([cache_filepath, cache_table]))
 
     # Setup output target
     tgt_ext = src_ext if tgt_ext is None else tgt_ext
