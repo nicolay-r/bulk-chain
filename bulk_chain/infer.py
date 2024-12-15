@@ -14,6 +14,7 @@ from source_iter.service_sqlite import SQLite3Service
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_args import CmdArgsService
 from bulk_chain.core.service_data import DataService
+from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_llm import chat_with_lm
 from bulk_chain.core.service_schema import SchemaService
@@ -103,7 +104,10 @@ def iter_content(input_dicts_it, llm, schema, limit_prompt=None):
     if isinstance(schema, dict):
         schema = SchemaService(json_data=schema)
 
-    queries_it = map(lambda data: data.update(schema.cot_args) or data, input_dicts_it)
+    queries_it = map(
+        lambda data: DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args),
+        input_dicts_it
+    )
 
     return (infer_query(data_record=q,
                         infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt),
@@ -122,7 +126,10 @@ def iter_content_cached(input_dicts_it, llm, schema, limit_prompt=None, cache_ta
         schema = SchemaService(json_data=schema)
 
     # Iterator of the queries.
-    queries_it = map(lambda data: data.update(schema.cot_args) or data, input_dicts_it)
+    queries_it = map(
+        lambda data: DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args),
+        input_dicts_it
+    )
 
     # Parse target.
     cache_filepath, _, cache_table = parse_filepath(filepath=cache_target)
