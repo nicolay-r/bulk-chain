@@ -65,11 +65,7 @@ def init_llm(**model_kwargs):
     return llm, llm_model_name
 
 
-def init_schema(json_filepath):
-    return SchemaService(json_data=JsonService.read(json_filepath))
-
-
-def optional_update_data_records(c, data_record, schema, infer_func):
+def __optional_update_data_records(c, data_record, schema, infer_func):
     assert (isinstance(c, str))
 
     if c in schema.p2r:
@@ -82,12 +78,12 @@ def optional_update_data_records(c, data_record, schema, infer_func):
     return data_record[c]
 
 
-def infer_query(data_record, schema, infer_func, cols=None):
+def __infer_query(data_record, schema, infer_func, cols=None):
     assert (callable(infer_func))
 
     cols = data_record.keys() if cols is None else cols
     for c in cols:
-        optional_update_data_records(c=c, data_record=data_record, schema=schema, infer_func=infer_func)
+        __optional_update_data_records(c=c, data_record=data_record, schema=schema, infer_func=infer_func)
     return data_record
 
 
@@ -109,9 +105,9 @@ def iter_content(input_dicts_it, llm, schema, limit_prompt=None):
         input_dicts_it
     )
 
-    return (infer_query(data_record=q,
-                        infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt),
-                        schema=schema)
+    return (__infer_query(data_record=q,
+                          infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt),
+                          schema=schema)
             for q in queries_it)
 
 
@@ -138,7 +134,7 @@ def iter_content_cached(input_dicts_it, llm, schema, limit_prompt=None, cache_ta
     WRITER_PROVIDERS["sqlite"](
         filepath=cache_filepath, table_name=cache_table,
         data_it=tqdm(queries_it, desc="Iter content"),
-        infer_data_func=lambda c, query: infer_query(
+        infer_data_func=lambda c, query: __infer_query(
             query, cols=[c],
             infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt),
             schema=schema)[c],
@@ -178,7 +174,7 @@ if __name__ == '__main__':
     llm, llm_model_name = init_llm(**model_args_dict)
 
     # Setup schema.
-    schema = init_schema(args.schema)
+    schema = SchemaService(json_data=JsonService.read(args.schema))
     if schema is not None:
         logger.info(f"Using schema: {schema.name}")
 
