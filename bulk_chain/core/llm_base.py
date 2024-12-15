@@ -6,21 +6,36 @@ from bulk_chain.core.utils import format_model_name
 
 class BaseLM(object):
 
-    def __init__(self, name, attempts=None, delay_sec=1, enable_log=True, **kwargs):
+    def __init__(self, name, attempts=None, delay_sec=1, enable_log=True,
+                 support_batching=False, **kwargs):
+
         self.__name = name
         self.__attempts = 1 if attempts is None else attempts
         self.__delay_sec = delay_sec
+        self.__support_batching = support_batching
 
         if enable_log:
             self.__logger = logging.getLogger(__name__)
             logging.basicConfig(level=logging.INFO)
 
-    def ask_safe(self, prompt):
+    def ask_core(self, batch):
 
         for i in range(self.__attempts):
             try:
-                response = self.ask(prompt)
-                return response
+                if self.__support_batching:
+                    # Launch in batch mode.
+                    content = self.ask(batch)
+                else:
+                    # Launch in non-batch mode.
+                    assert len(batch) == 1, "The LM does not support batching," \
+                                            f" while size of the content is {len(batch)} which is not equal 1."
+                    content = batch[0]
+
+                response = self.ask(content)
+
+                # Wrapping into batch the response in the case of non-batching mode.
+                return response if self.__support_batching else [response]
+
             except Exception as e:
                 if self.__logger is not None:
                     self.__logger.info("Unable to infer the result. Try {} out of {}.".format(i, self.__attempts))
@@ -29,7 +44,7 @@ class BaseLM(object):
 
         raise Exception("Can't infer")
 
-    def ask(self, prompt):
+    def ask(self, content):
         raise NotImplemented()
 
     def name(self):

@@ -13,6 +13,7 @@ from source_iter.service_sqlite import SQLite3Service
 
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_args import CmdArgsService
+from bulk_chain.core.service_batch import BatchService
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
@@ -28,8 +29,10 @@ CWD = os.getcwd()
 
 
 INFER_MODES = {
-    "default": lambda llm, prompt, limit_prompt=None: llm.ask_safe(
-        prompt[:limit_prompt] if limit_prompt is not None else prompt)
+    "default": lambda llm, prompt, limit_prompt=None: llm.ask_core(
+        prompt[:limit_prompt] if limit_prompt is not None else prompt),
+    "batch": lambda llm, batch, limit_prompt=None: llm.ask_core(
+        DataService.limit_prompts(batch, limit=limit_prompt))
 }
 
 
@@ -65,34 +68,46 @@ def init_llm(**model_kwargs):
     return llm, llm_model_name
 
 
-def __optional_update_data_records(c, data_record, schema, infer_func):
+def __update_batch_content(c, batch, schema, infer_func):
+    assert (isinstance(batch, list))
     assert (isinstance(c, str))
 
     if c in schema.p2r:
-        data_record[c] = DataService.get_prompt_text(prompt=data_record[c]["prompt"], data_dict=data_record)
+        for batch_item in batch:
+            batch_item[c] = DataService.get_prompt_text(prompt=batch_item[c]["prompt"], data_dict=batch_item)
     if c in schema.r2p:
         p_column = schema.r2p[c]
         # This instruction takes a lot of time in a non-batching mode.
-        data_record[c] = infer_func(data_record[p_column])
+        BatchService.handle_param_as_batch(batch=batch,
+                                           src_param=p_column,
+                                           tgt_param=c,
+                                           handle_func=lambda b: infer_func(b))
 
-    return data_record[c]
 
-
-def __infer_query(data_record, schema, infer_func, cols=None):
+def __infer_batch(batch, schema, infer_func, cols=None):
+    assert (isinstance(batch, list))
     assert (callable(infer_func))
 
-    cols = data_record.keys() if cols is None else cols
+    if len(batch) == 0:
+        return batch
+
+    if cols is None:
+        first_item = batch[0]
+        cols = first_item.keys() if cols is None else cols
+
     for c in cols:
-        __optional_update_data_records(c=c, data_record=data_record, schema=schema, infer_func=infer_func)
-    return data_record
+        __update_batch_content(c=c, batch=batch, schema=schema, infer_func=infer_func)
+
+    return batch
 
 
-def iter_content(input_dicts_it, llm, schema, limit_prompt=None):
+def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
     """
     assert (isinstance(llm, BaseLM))
+    assert (batch_size == 1)
 
     # Quick initialization of the schema.
     if isinstance(schema, str):
@@ -100,15 +115,17 @@ def iter_content(input_dicts_it, llm, schema, limit_prompt=None):
     if isinstance(schema, dict):
         schema = SchemaService(json_data=schema)
 
-    queries_it = map(
-        lambda data: DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args),
+    batches_it = map(
+        lambda data: [
+            DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args)
+        ],
         input_dicts_it
     )
 
-    return (__infer_query(data_record=q,
-                          infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt),
+    return (__infer_batch(batch=batch,
+                          infer_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
                           schema=schema)
-            for q in queries_it)
+            for batch in batches_it)
 
 
 def iter_content_cached(input_dicts_it, llm, schema, limit_prompt=None, cache_target=None, **cache_kwargs):
@@ -122,7 +139,7 @@ def iter_content_cached(input_dicts_it, llm, schema, limit_prompt=None, cache_ta
         schema = SchemaService(json_data=schema)
 
     # Iterator of the queries.
-    queries_it = map(
+    prompts_it = map(
         lambda data: DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args),
         input_dicts_it
     )
@@ -133,11 +150,11 @@ def iter_content_cached(input_dicts_it, llm, schema, limit_prompt=None, cache_ta
     # Perform caching first.
     WRITER_PROVIDERS["sqlite"](
         filepath=cache_filepath, table_name=cache_table,
-        data_it=tqdm(queries_it, desc="Iter content"),
-        infer_data_func=lambda c, query: __infer_query(
-            query, cols=[c],
-            infer_func=lambda prompt: INFER_MODES["default"](llm, prompt, limit_prompt),
-            schema=schema)[c],
+        data_it=tqdm(prompts_it, desc="Iter content"),
+        infer_data_func=lambda c, prompt: __infer_batch(
+            batch=[prompt], cols=[c],
+            infer_func=lambda batch: INFER_MODES["default"](llm, batch, limit_prompt),
+            schema=schema)[0][c],
         **cache_kwargs)
 
     # Then retrieve data.

@@ -20,3 +20,7 @@ class DataService(object):
         field_names = list(parse_fields_func(prompt))
         return DataService.compose_prompt_text(
             prompt=prompt, data_dict=data_dict, field_names=field_names)
+
+    @staticmethod
+    def limit_prompts(prompts_list, limit=None):
+        return [p[:limit] if limit is not None else p for p in prompts_list]

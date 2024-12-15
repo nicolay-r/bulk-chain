@@ -74,7 +74,7 @@ def chat_with_lm(lm, chain=None, model_name=None):
             logger.info(nice_output(actual_prompt, pad=pad*2, remove_new_line=True, width=80))
 
             # Response.
-            response = lm.ask_safe(actual_prompt)
+            response = lm.ask_core(actual_prompt)
             logger.info(pad_str(f"{model_name} (resp)->", pad=pad))
             logger.info(nice_output(response, pad=pad*2, remove_new_line=False, width=80))
 
