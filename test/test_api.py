@@ -27,6 +27,7 @@ class TestAPI(unittest.TestCase):
     def test_iter(self):
         data_it = iter_content(input_dicts_it=self.it_data(20),
                                llm=self.llm,
+                               batch_size=1,
                                schema="../ext/schema/default.json")
 
         for data in data_it:

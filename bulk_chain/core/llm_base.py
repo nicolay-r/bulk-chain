@@ -28,7 +28,8 @@ class BaseLM(object):
                 else:
                     # Launch in non-batch mode.
                     assert len(batch) == 1, "The LM does not support batching," \
-                                            f" while size of the content is {len(batch)} which is not equal 1."
+                                            f" while size of the content is {len(batch)} which is not equal 1. " \
+                                            f"Please enable batch-supporting or set required inference settings."
                     content = batch[0]
 
                 response = self.ask(content)

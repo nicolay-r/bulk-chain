@@ -13,7 +13,7 @@ from source_iter.service_sqlite import SQLite3Service
 
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_args import CmdArgsService
-from bulk_chain.core.service_batch import BatchService
+from bulk_chain.core.service_batch import BatchService, BatchIterator
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
@@ -107,7 +107,6 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None):
         the given `schema`
     """
     assert (isinstance(llm, BaseLM))
-    assert (batch_size == 1)
 
     # Quick initialization of the schema.
     if isinstance(schema, str):
@@ -115,17 +114,15 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None):
     if isinstance(schema, dict):
         schema = SchemaService(json_data=schema)
 
-    batches_it = map(
-        lambda data: [
-            DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args)
-        ],
+    prompts_it = map(
+        lambda data: DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args),
         input_dicts_it
     )
 
     return (__infer_batch(batch=batch,
                           infer_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
                           schema=schema)
-            for batch in batches_it)
+            for batch in BatchIterator(prompts_it, batch_size=batch_size))
 
 
 def iter_content_cached(input_dicts_it, llm, schema, limit_prompt=None, cache_target=None, **cache_kwargs):
