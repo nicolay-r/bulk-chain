@@ -8,14 +8,16 @@
     <img src="logo.png"/>
 </p>
 
-A lightweight, no-strings-attached **[Chain-of-Thought](https://arxiv.org/abs/2201.11903) framework** for your LLM, ensuring reliable results for bulk input requests stored in `CSV` / `JSONL` / `sqlite`.
-It allows applying series of prompts formed into `schema` (See [related section](#chain-of-thought-schema))
+A lightweight, no-strings-attached **framework**  for your LLM that allows applying series of [Chain-of-Thought](https://arxiv.org/abs/2201.11903)-alike prompt series formed into `schema` (See [related section](#chain-of-thought-schema)).
 
-### Features
+### Main Features
 * ✅ **No-strings**: you're free to LLM dependencies and flexible `venv` customization.
-* ✅ **Provides iterator over infinite amount of input contexts** served in `CSV`/`JSONL`.
-* ✅ **Progress caching**: withstanding exception during LLM calls by using `sqlite3` engine for caching LLM answers;
 * ✅ **Support schemas descriptions** for Chain-of-Thought concept.
+* ✅ **Provides iterator over infinite amount of input contexts** served in `CSV`/`JSONL`.
+
+### Extra Features
+* ✅ **Progress caching [for remote LLMs]**: withstanding exception during LLM calls by using `sqlite3` engine for caching LLM answers;
+
 
 # Installation
 
