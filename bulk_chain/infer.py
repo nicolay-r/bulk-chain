@@ -125,9 +125,9 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None):
             for batch in BatchIterator(prompts_it, batch_size=batch_size))
 
 
-def iter_content_cached(input_dicts_it, llm, schema, limit_prompt=None, cache_target=None, **cache_kwargs):
+def iter_content_cached(input_dicts_it, llm, schema, cache_target, limit_prompt=None, **cache_kwargs):
     assert (isinstance(llm, BaseLM))
-    assert (isinstance(cache_target, str) or cache_target is None)
+    assert (isinstance(cache_target, str))
 
     # Quick initialization of the schema.
     if isinstance(schema, str):
