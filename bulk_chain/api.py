@@ -1,3 +1,5 @@
+from itertools import chain
+
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_batch import BatchIterator, BatchService
 from bulk_chain.core.service_data import DataService
@@ -47,7 +49,7 @@ def _infer_batch(batch, schema, infer_func, cols=None):
     return batch
 
 
-def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None):
+def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True, limit_prompt=None):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
@@ -65,7 +67,9 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None):
         input_dicts_it
     )
 
-    return (_infer_batch(batch=batch,
-                         infer_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
-                         schema=schema)
-            for batch in BatchIterator(prompts_it, batch_size=batch_size))
+    content_it = (_infer_batch(batch=batch,
+                               infer_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
+                               schema=schema)
+                  for batch in BatchIterator(prompts_it, batch_size=batch_size))
+
+    yield from content_it if return_batch else chain.from_iterable(content_it)

@@ -1,6 +1,7 @@
 import unittest
 
-from bulk_chain.infer import iter_content, iter_content_cached
+from bulk_chain.api import iter_content
+from bulk_chain.infer import iter_content_cached
 from ext.replicate import Replicate
 
 
@@ -28,6 +29,7 @@ class TestAPI(unittest.TestCase):
         data_it = iter_content(input_dicts_it=self.it_data(20),
                                llm=self.llm,
                                batch_size=1,
+                               return_batch=True,
                                schema="../ext/schema/default.json")
 
         for data in data_it:
