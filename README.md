@@ -21,8 +21,16 @@ A lightweight, no-strings-attached **framework**  for your LLM that allows apply
 
 # Installation
 
+From PyPI: 
+
 ```bash
 pip install bulk-chain
+```
+
+or latest version from here:
+
+```bash
+pip install git+https://github.com/nicolay-r/bulk-chain@master
 ```
 
 ## Chain-of-Thought Schema
