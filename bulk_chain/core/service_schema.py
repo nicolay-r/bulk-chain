@@ -2,12 +2,11 @@ class SchemaService(object):
 
     def __init__(self, json_data):
         self.src = json_data
-        self.name = self.src["name"]
         self.r2p, self.p2r, self.cot_args, self.chain = SchemaService.__init_schema(prompts=json_data["schema"])
 
     @classmethod
     def from_prompt(cls, prompt):
-        prompt_schema = {"name": "prompt", "schema": [{"prompt": prompt, "out": "response", "in": "prompt"}]}
+        prompt_schema = {"schema": [{"prompt": prompt, "out": "response", "in": "prompt"}]}
         return cls(prompt_schema)
 
     @staticmethod

@@ -189,8 +189,9 @@ if __name__ == '__main__':
 
     # Setup schema.
     schema = SchemaService(json_data=JsonService.read(args.schema))
+    schema_name = schema.src.get("name", None)
     if schema is not None:
-        logger.info(f"Using schema: {schema.name}")
+        logger.info(f"Using schema: {schema_name}")
 
     input_providers = {
         None: lambda _: chat_with_lm(llm, chain=schema.chain, model_name=llm_model_name),
@@ -235,7 +236,7 @@ if __name__ == '__main__':
 
     def default_output_file_template(ext):
         # This is a default template for output files to be generated.
-        return "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema.name]), ext])
+        return "".join(["_".join([join(CWD, basename(src_filepath)), llm.name(), schema_name]), ext])
 
     # Setup cache target as well as the related table.
     cache_filepath = default_output_file_template(".sqlite") if tgt_filepath is None else tgt_filepath
