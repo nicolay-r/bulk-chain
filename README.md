@@ -59,9 +59,7 @@ Another templates are available [here](/ext/schema/thor_cot_schema.json).
 
 # Usage
 
-Just **three** simple steps:
-
-1. Define your [CoT Schema](#chain-of-thought-schema), or fetch it as shown below:
+1. Define your [cot-schema](#chain-of-thought-schema), or fetch it as shown below:
 ```bash
 !wget https://raw.githubusercontent.com/nicolay-r/bulk-chain/refs/heads/master/ext/schema/default.json
 ```
@@ -70,7 +68,12 @@ Just **three** simple steps:
 !wget https://raw.githubusercontent.com/nicolay-r/bulk-chain/refs/heads/master/ext/flan_t5.py
 ```
 
-3. Launch inference in (chat mode):
+## API
+
+Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/bulk-chain/wiki)
+
+## Shell-script / Bash
+
 ```bash
 !python -m bulk_chain.infer \
     --schema "default.json" \
