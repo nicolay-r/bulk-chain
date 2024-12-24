@@ -1,2 +1,0 @@
-tqdm
-source-iter==0.24.2

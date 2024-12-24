@@ -70,6 +70,8 @@ Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/b
 
 ## Shell
 
+> **NOTE:** You have to install `source-iter` package
+
 ```bash
 python3 -m bulk_chain.infer \
     --src "<PATH-TO-YOUR-CSV-or-JSONL>" \
