@@ -74,9 +74,9 @@ def chat_with_lm(lm, chain=None, model_name=None):
             logger.info(nice_output(actual_prompt, pad=pad*2, remove_new_line=True, width=80))
 
             # Response.
-            response = lm.ask_core(actual_prompt)
+            response_batch = lm.ask_core(batch=[actual_prompt])
             logger.info(pad_str(f"{model_name} (resp)->", pad=pad))
-            logger.info(nice_output(response, pad=pad*2, remove_new_line=False, width=80))
+            logger.info(nice_output(response_batch[0], pad=pad * 2, remove_new_line=False, width=80))
 
             # Collecting the answer for the next turn.
-            data_dict[prompt_args["out"]] = response
+            data_dict[prompt_args["out"]] = response_batch[0]
