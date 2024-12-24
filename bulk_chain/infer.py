@@ -1,4 +1,3 @@
-import os
 from os.path import join, basename
 
 import argparse
@@ -10,7 +9,7 @@ from source_iter.service_jsonl import JsonlService
 from source_iter.service_sqlite import SQLite3Service
 from tqdm import tqdm
 
-from bulk_chain.api import INFER_MODES, _infer_batch
+from bulk_chain.api import INFER_MODES, _infer_batch, CWD
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_args import CmdArgsService
 from bulk_chain.core.service_dict import DictionaryService
@@ -21,9 +20,6 @@ from bulk_chain.core.utils import dynamic_init, find_by_prefix, handle_table_nam
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-
-
-CWD = os.getcwd()
 
 
 WRITER_PROVIDERS = {

@@ -1,3 +1,4 @@
+import os
 from itertools import chain
 
 from bulk_chain.core.llm_base import BaseLM
@@ -14,6 +15,9 @@ INFER_MODES = {
     "batch": lambda llm, batch, limit_prompt=None: llm.ask_core(
         DataService.limit_prompts(batch, limit=limit_prompt))
 }
+
+
+CWD = os.getcwd()
 
 
 def _update_batch_content(c, batch, schema, infer_func):

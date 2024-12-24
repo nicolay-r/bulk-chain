@@ -1,14 +1,16 @@
 import unittest
+from os.path import join
 
-from bulk_chain.api import iter_content
+from bulk_chain.api import iter_content, CWD
+from bulk_chain.core.utils import dynamic_init
 from bulk_chain.infer import iter_content_cached
-from ext.replicate import Replicate
 
 
 class TestAPI(unittest.TestCase):
 
-    llm = Replicate(model_name="meta/meta-llama-3-8b-instruct",
-                    api_token="<API-KEY>")
+    llm = dynamic_init(class_dir=join(CWD, ".."),
+                       class_filepath="ext/replicate.py",
+                       class_name="Replicate")(api_token="<API-KEY>")
 
     def it_data(self, n):
         for i in range(n):
