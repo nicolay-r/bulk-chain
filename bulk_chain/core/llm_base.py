@@ -6,7 +6,7 @@ from bulk_chain.core.utils import format_model_name
 
 class BaseLM(object):
 
-    def __init__(self, name, attempts=None, delay_sec=1, enable_log=True,
+    def __init__(self, name=None, attempts=None, delay_sec=1, enable_log=True,
                  support_batching=False, **kwargs):
 
         self.__name = name
