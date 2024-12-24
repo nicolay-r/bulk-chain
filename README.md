@@ -8,7 +8,7 @@
     <img src="logo.png"/>
 </p>
 
-A lightweight, no-strings-attached **framework**  for your LLM that allows applying [Chain-of-Thought](https://arxiv.org/abs/2201.11903)-alike prompt `schema` (See [related section](#chain-of-thought-schema)) towards a massive textual collections.
+A lightweight, no-strings-attached **framework**  for your LLM that allows applying [Chain-of-Thought](https://arxiv.org/abs/2201.11903) prompt `schema` (See [related section](#chain-of-thought-schema)) towards a massive textual collections.
 
 ### Main Features
 * ✅ **No-strings**: you're free to LLM dependencies and flexible `venv` customization.
@@ -55,38 +55,35 @@ Below, is an example on how to declare your own schema:
 }
 ```
 
-Another templates are available [here](/ext/schema/thor_cot_schema.json).
+Another templates are available [here](/ext/schema/).
 
 # Usage
 
-1. Define your [cot-schema](#chain-of-thought-schema), or fetch it as shown below:
-```bash
-!wget https://raw.githubusercontent.com/nicolay-r/bulk-chain/refs/heads/master/ext/schema/default.json
-```
-2. Fetch or write your own **model** or pick the one [preset here](/ext/):
-```bash
-!wget https://raw.githubusercontent.com/nicolay-r/bulk-chain/refs/heads/master/ext/flan_t5.py
-```
+Preliminary steps:
+
+1. Define your [schema](#chain-of-thought-schema) ([Example for Sentiment Analysis](/ext/schema/thor_cot_schema.json)))
+2. Wrap or pick **LLM model** from the [list of presets](/ext/).
 
 ## API
 
 Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/bulk-chain/wiki)
 
-## Shell-script / Bash
+## Shell
 
 ```bash
-!python -m bulk_chain.infer \
-    --schema "default.json" \
-    --adapter "dynamic:flan_t5.py:FlanT5" \
+python3 -m bulk_chain.infer \
+    --src "<PATH-TO-YOUR-CSV-or-JSONL>" \
+    --schema "ext/schema/default.json" \
+    --adapter "dynamic:ext/replicate.py:Replicate" \
     %%m \
-    --device "cpu" \
+    --api_token "<REPLICATE-API-TOKEN>" \
     --temp 0.1
 ```
 
 # Embed your LLM
 
 All you have to do is to implement `BaseLM` class, that includes:
-* `__init__` -- for initialization;
+* `__init__` -- for setting up *batching mode support* and (optional) *model name*;
 * `ask(prompt)` -- infer your model with the given `prompt`.
 
 See examples with models [here](/ext).
