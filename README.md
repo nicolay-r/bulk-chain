@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm"><b>Third-party providers hosting</b>👁️</a>
+  <a href="https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm"><b>Third-party providers hosting</b>↗️</a>
 </p>
 
-A lightweight, no-strings-attached **framework**  for your LLM that allows applying [Chain-of-Thought](https://arxiv.org/abs/2201.11903) prompt `schema` (See [related section](#chain-of-thought-schema)) towards a massive textual collections using custom [third-party providers](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm)
+A no-strings-attached **framework**  for your LLM that allows applying Chain-of-Thought-alike [prompt `schema`](#chain-of-thought-schema) towards a massive textual collections using custom **[third-party providers ↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm)**.
 
 ### Main Features
 * ✅ **No-strings**: you're free to LLM dependencies and flexible `venv` customization.
