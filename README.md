@@ -82,8 +82,7 @@ python3 -m bulk_chain.infer \
     --schema "ext/schema/default.json" \
     --adapter "dynamic:ext/replicate.py:Replicate" \
     %%m \
-    --api_token "<REPLICATE-API-TOKEN>" \
-    --temp 0.1
+    --api_token "<REPLICATE-API-TOKEN>"
 ```
 
 # Embed your LLM
