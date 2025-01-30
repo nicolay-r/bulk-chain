@@ -9,8 +9,9 @@ from bulk_chain.infer import iter_content_cached
 class TestAPI(unittest.TestCase):
 
     llm = dynamic_init(class_dir=join(CWD, ".."),
-                       class_filepath="ext/replicate.py",
-                       class_name="Replicate")(api_token="<API-KEY>")
+                       class_filepath="providers/replicate_104.py",
+                       class_name="Replicate")(api_token="<API-KEY>",
+                                               model_name="deepseek-ai/deepseek-r1")
 
     def it_data(self, n):
         for i in range(n):
@@ -19,7 +20,7 @@ class TestAPI(unittest.TestCase):
     def test_iter_cached(self):
         data_it = iter_content_cached(input_dicts_it=self.it_data(20),
                                       llm=self.llm,
-                                      schema="../ext/schema/default.json",
+                                      schema="../schema/default.json",
                                       # Cache-related extra parameters.
                                       cache_target="out.sqlite:content",
                                       id_column_name="ind")
@@ -32,7 +33,7 @@ class TestAPI(unittest.TestCase):
                                llm=self.llm,
                                batch_size=1,
                                return_batch=True,
-                               schema="../ext/schema/default.json")
+                               schema="../schema/default.json")
 
         for data in data_it:
             print(data)
