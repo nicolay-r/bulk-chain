@@ -28,7 +28,7 @@ A no-strings-attached **framework**  for your LLM that allows applying Chain-of-
 From PyPI: 
 
 ```bash
-pip install bulk-chain
+pip install --no-deps bulk-chain
 ```
 
 or latest version from here:
@@ -66,7 +66,7 @@ Another templates are available [here](/ext/schema/).
 Preliminary steps:
 
 1. Define your [schema](#chain-of-thought-schema) ([Example for Sentiment Analysis](/ext/schema/thor_cot_schema.json)))
-2. Wrap or pick **LLM model** from the [list of presets](/ext/).
+2. Wrap or pick **LLM model** from the [<b>Third-party providers hosting</b>↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
 
 ## API
 
@@ -74,13 +74,18 @@ Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/b
 
 ## Shell
 
-> **NOTE:** You have to install `source-iter` package
+> **NOTE:** You have to install `source-iter` and `tqdm` packages that actual [dependencies](dependencies.txt) of this project
 
+1. Download [replicate](https://replicate.com/) provider for `bulk-chain`:
+```bash
+wget https://raw.githubusercontent.com/nicolay-r/nlp-thirdgate/refs/heads/master/llm/replicate_104.py
+```
+2. Launch inference using `DeepSeek-R1`:
 ```bash
 python3 -m bulk_chain.infer \
     --src "<PATH-TO-YOUR-CSV-or-JSONL>" \
-    --schema "ext/schema/default.json" \
-    --adapter "dynamic:ext/replicate.py:Replicate" \
+    --schema "schema/default.json" \
+    --adapter "replicate_104.py:Replicate" \
     %%m \
     --api_token "<REPLICATE-API-TOKEN>"
 ```
