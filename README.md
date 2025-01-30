@@ -87,6 +87,7 @@ python3 -m bulk_chain.infer \
     --schema "schema/default.json" \
     --adapter "replicate_104.py:Replicate" \
     %%m \
+    --model_name "deepseek-ai/deepseek-r1" \
     --api_token "<REPLICATE-API-TOKEN>"
 ```
 
