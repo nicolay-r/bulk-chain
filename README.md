@@ -76,12 +76,12 @@ Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/b
 
 > **NOTE:** You have to install `source-iter` and `tqdm` packages that actual [dependencies](dependencies.txt) of this project
 
-1. Download [replicate](https://replicate.com/) provider for `bulk-chain`:
+1. ⬇️ Download [replicate](https://replicate.com/) provider for `bulk-chain`:
 ```bash
 wget https://raw.githubusercontent.com/nicolay-r/nlp-thirdgate/refs/heads/master/llm/replicate_104.py
 ```
-2. Setup your reasoning `schema.json` according to the [following example ↗️](schema/default.json)
-3. Launch inference using `DeepSeek-R1`:
+2. 📜 Setup your reasoning `schema.json` according to the [following example ↗️](schema/default.json)
+3. 🚀 Launch inference using `DeepSeek-R1`:
 ```bash
 python3 -m bulk_chain.infer \
     --src "<PATH-TO-YOUR-CSV-or-JSONL>" \
