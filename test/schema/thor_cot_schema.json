@@ -1,0 +1,9 @@
+{
+  "name": "thor-cot-schema",
+  "schema": [
+    {"prompt": "Given the sentence '{text}'. Which specific aspect of '{entity}' is possibly mentioned?", "out": "r_aspect"},
+    {"prompt": "Given the sentence '{text}'. The mentioned aspect is about '{r_aspect}'. Based on the common sense, what is the implicit opinion towards the mentioned aspect of '{entity}', and why?", "out":  "r_opinion"},
+    {"prompt": "Given the sentence '{text}'. The opinion towards the mentioned aspect of '{entity}' is '{r_opinion}'. Based on such opinion, what is the sentiment polarity towards '{entity}'?", "out":  "r_polarity"},
+    {"prompt": "Given the sentence '{text}'. The sentiment polarity is '{r_polarity}'. Based on these contexts, summarize and return the sentiment polarity only, such as: positive, negative, neutral.", "out": "r_label"}
+  ]
+}
