@@ -1,1 +1,50 @@
-{"text":"X invent sanctions against Y", "entity": "X"}
+{"text": "The camera on this phone is absolutely stunning, but the battery drains too fast.", "entity": "camera"}
+{"text": "I love the performance of this laptop, but the keyboard feels a bit cheap.", "entity": "keyboard"}
+{"text": "The restaurant had amazing service, but the food was a little bland.", "entity": "food"}
+{"text": "This movie had great visuals, but the storyline was very weak.", "entity": "storyline"}
+{"text": "The hotel room was spacious and clean, but the WiFi was unreliable.", "entity": "WiFi"}
+{"text": "The display on this laptop is incredibly sharp, but the speakers are too quiet.", "entity": "speakers"}
+{"text": "I really enjoy the gameplay of this video game, but the graphics feel outdated.", "entity": "graphics"}
+{"text": "The customer support was very responsive, but the delivery took too long.", "entity": "delivery"}
+{"text": "This book has a compelling storyline, but the character development is weak.", "entity": "character development"}
+{"text": "The smartwatch has a sleek design, but the battery life is disappointing.", "entity": "battery life"}
+{"text": "The car's engine performance is excellent, but the interior feels outdated.", "entity": "interior"}
+{"text": "I love the picture quality of this TV, but the remote control is not very intuitive.", "entity": "remote control"}
+{"text": "The airline staff was very polite, but the legroom in economy class was terrible.", "entity": "legroom"}
+{"text": "This coffee shop has a cozy ambiance, but the coffee itself is overpriced.", "entity": "coffee"}
+{"text": "The headphones have great noise cancellation, but the ear cushions are uncomfortable.", "entity": "ear cushions"}
+{"text": "The smartphone has a super smooth interface, but the fingerprint sensor is slow.", "entity": "fingerprint sensor"}
+{"text": "I appreciate the variety of dishes on the menu, but the service was extremely slow.", "entity": "service"}
+{"text": "The gaming console runs games flawlessly, but the controller feels flimsy.", "entity": "controller"}
+{"text": "This hotel has a fantastic view, but the air conditioning was not working properly.", "entity": "air conditioning"}
+{"text": "The online course content is very informative, but the instructor speaks too fast.", "entity": "instructor"}
+{"text": "The laptop is lightweight and easy to carry, but the trackpad is unresponsive.", "entity": "trackpad"}
+{"text": "The smartphone camera takes crystal-clear pictures, but the night mode is terrible.", "entity": "night mode"}
+{"text": "The restaurant has a beautiful interior, but the food portions are too small.", "entity": "food portions"}
+{"text": "The smartwatch tracks fitness accurately, but the charging time is too long.", "entity": "charging time"}
+{"text": "The air conditioner cools the room quickly, but it makes too much noise.", "entity": "noise"}
+{"text": "The washing machine cleans clothes effectively, but the drying function is weak.", "entity": "drying function"}
+{"text": "The movie has stunning special effects, but the dialogues are poorly written.", "entity": "dialogues"}
+{"text": "This new software has an intuitive interface, but it crashes frequently.", "entity": "stability"}
+{"text": "The backpack is very durable, but the zippers are hard to open.", "entity": "zippers"}
+{"text": "The electric scooter has a powerful battery, but the brakes are not very responsive.", "entity": "brakes"}
+{"text": "The online shopping experience was smooth, but the refund policy is complicated.", "entity": "refund policy"}
+{"text": "The coffee machine brews quickly, but the water tank is too small.", "entity": "water tank"}
+{"text": "The gaming mouse is highly responsive, but the buttons feel cheap.", "entity": "buttons"}
+{"text": "The airline provides delicious meals, but the check-in process is too slow.", "entity": "check-in process"}
+{"text": "The mattress is very comfortable, but it has a strong chemical smell.", "entity": "smell"}
+{"text": "The smartphone has an excellent battery life, but the screen is too dim outdoors.", "entity": "screen brightness"}
+{"text": "The headphones offer great bass, but the Bluetooth connection is unstable.", "entity": "Bluetooth connection"}
+{"text": "The printer produces high-quality prints, but it runs out of ink too quickly.", "entity": "ink consumption"}
+{"text": "The car has smooth handling, but the fuel efficiency is poor.", "entity": "fuel efficiency"}
+{"text": "The hairdryer is compact and travel-friendly, but it overheats after a few minutes.", "entity": "overheating"}
+{"text": "The hotel staff was very welcoming, but the WiFi speed was terrible.", "entity": "WiFi speed"}
+{"text": "The new textbook explains concepts well, but the font is too small to read.", "entity": "font size"}
+{"text": "The food delivery was fast, but the packaging was not secure.", "entity": "packaging"}
+{"text": "The desk chair has great lumbar support, but the armrests are too low.", "entity": "armrests"}
+{"text": "The phone case is stylish, but it does not provide good protection.", "entity": "protection"}
+{"text": "The running shoes have excellent grip, but they feel too tight.", "entity": "fit"}
+{"text": "The car speakers deliver great sound, but the volume control is inconvenient.", "entity": "volume control"}
+{"text": "The smart home assistant responds quickly, but the voice recognition struggles with accents.", "entity": "voice recognition"}
+{"text": "The new laptop has a sleek design, but it heats up too fast.", "entity": "overheating"}
+{"text": "The movie had a great plot twist, but the pacing was too slow.", "entity": "pacing"}

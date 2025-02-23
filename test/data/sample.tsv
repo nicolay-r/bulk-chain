@@ -1,2 +1,51 @@
-sentence	entity
-X invent sanctions against Y	X
+text	entity
+The camera on this phone is absolutely stunning, but the battery drains too fast.	camera
+I love the performance of this laptop, but the keyboard feels a bit cheap.	keyboard
+The restaurant had amazing service, but the food was a little bland.	food
+This movie had great visuals, but the storyline was very weak.	storyline
+The hotel room was spacious and clean, but the WiFi was unreliable.	WiFi
+The display on this laptop is incredibly sharp, but the speakers are too quiet.	speakers
+I really enjoy the gameplay of this video game, but the graphics feel outdated.	graphics
+The customer support was very responsive, but the delivery took too long.	delivery
+This book has a compelling storyline, but the character development is weak.	character development
+The smartwatch has a sleek design, but the battery life is disappointing.	battery life
+The car's engine performance is excellent, but the interior feels outdated.	interior
+I love the picture quality of this TV, but the remote control is not very intuitive.	remote control
+The airline staff was very polite, but the legroom in economy class was terrible.	legroom
+This coffee shop has a cozy ambiance, but the coffee itself is overpriced.	coffee
+The headphones have great noise cancellation, but the ear cushions are uncomfortable.	ear cushions
+The smartphone has a super smooth interface, but the fingerprint sensor is slow.	fingerprint sensor
+I appreciate the variety of dishes on the menu, but the service was extremely slow.	service
+The gaming console runs games flawlessly, but the controller feels flimsy.	controller
+This hotel has a fantastic view, but the air conditioning was not working properly.	air conditioning
+The online course content is very informative, but the instructor speaks too fast.	instructor
+The laptop is lightweight and easy to carry, but the trackpad is unresponsive.	trackpad
+The smartphone camera takes crystal-clear pictures, but the night mode is terrible.	night mode
+The restaurant has a beautiful interior, but the food portions are too small.	food portions
+The smartwatch tracks fitness accurately, but the charging time is too long.	charging time
+The air conditioner cools the room quickly, but it makes too much noise.	noise
+The washing machine cleans clothes effectively, but the drying function is weak.	drying function
+The movie has stunning special effects, but the dialogues are poorly written.	dialogues
+This new software has an intuitive interface, but it crashes frequently.	stability
+The backpack is very durable, but the zippers are hard to open.	zippers
+The electric scooter has a powerful battery, but the brakes are not very responsive.	brakes
+The online shopping experience was smooth, but the refund policy is complicated.	refund policy
+The coffee machine brews quickly, but the water tank is too small.	water tank
+The gaming mouse is highly responsive, but the buttons feel cheap.	buttons
+The airline provides delicious meals, but the check-in process is too slow.	check-in process
+The mattress is very comfortable, but it has a strong chemical smell.	smell
+The smartphone has an excellent battery life, but the screen is too dim outdoors.	screen brightness
+The headphones offer great bass, but the Bluetooth connection is unstable.	Bluetooth connection
+The printer produces high-quality prints, but it runs out of ink too quickly.	ink consumption
+The car has smooth handling, but the fuel efficiency is poor.	fuel efficiency
+The hairdryer is compact and travel-friendly, but it overheats after a few minutes.	overheating
+The hotel staff was very welcoming, but the WiFi speed was terrible.	WiFi speed
+The new textbook explains concepts well, but the font is too small to read.	font size
+The food delivery was fast, but the packaging was not secure.	packaging
+The desk chair has great lumbar support, but the armrests are too low.	armrests
+The phone case is stylish, but it does not provide good protection.	protection
+The running shoes have excellent grip, but they feel too tight.	fit
+The car speakers deliver great sound, but the volume control is inconvenient.	volume control
+The smart home assistant responds quickly, but the voice recognition struggles with accents.	voice recognition
+The new laptop has a sleek design, but it heats up too fast.	overheating
+The movie had a great plot twist, but the pacing was too slow.	pacing
