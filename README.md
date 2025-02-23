@@ -59,8 +59,6 @@ Below, is an example on how to declare your own schema:
 }
 ```
 
-Another templates are available [here](/ext/schema/).
-
 # Usage
 
 Preliminary steps:
@@ -80,12 +78,12 @@ Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/b
 ```bash
 wget https://raw.githubusercontent.com/nicolay-r/nlp-thirdgate/refs/heads/master/llm/replicate_104.py
 ```
-2. 📜 Setup your reasoning `schema.json` according to the [following example ↗️](schema/default.json)
+2. 📜 Setup your reasoning `schema.json` according to the [following example ↗️](test/schema/default.json)
 3. 🚀 Launch inference using `DeepSeek-R1`:
 ```bash
 python3 -m bulk_chain.infer \
     --src "<PATH-TO-YOUR-CSV-or-JSONL>" \
-    --schema "schema/default.json" \
+    --schema "test/schema/default.json" \
     --adapter "replicate_104.py:Replicate" \
     %%m \
     --model_name "deepseek-ai/deepseek-r1" \
