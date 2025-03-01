@@ -42,12 +42,13 @@ def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None):
 
         # Launching the CoT engine loop.
         data_dict = {} | preset_dict
-        for prompt_args in chain:
+        for chain_ind, prompt_args in enumerate(chain):
 
             # Processing the prompt.
             prompt = prompt_args["prompt"]
 
             # Filling necessary parameters.
+            user_informed = False
             field_names = list(iter_params(prompt))
             for ind, f_name in enumerate(field_names):
 
@@ -56,19 +57,23 @@ def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None):
 
                 user_input = input(f"Enter your prompt for `{f_name}` ({ind+1}/{len(field_names)}) "
                                    f"(or 'exit' to quit): ")
+                user_informed = True
 
                 if user_input.lower() == 'exit':
                     do_exit = True
                     break
 
                 data_dict[f_name] = user_input
-                
-            user_input = input(f"Enter to continue (or 'exit' to quit) ...")
-            if user_input.lower() == 'exit':
-                do_exit = True
 
             if do_exit:
                 break
+
+            # In the case of the initial interaction with the chain.
+            # we make sure that aware user for starting interaction.
+            if chain_ind == 0 and not user_informed:
+                user_input = input(f"Enter to continue (or 'exit' to quit) ...")
+                if user_input.lower() == 'exit':
+                    do_exit = True
 
             # Finally asking LLM.
             DataService.compose_prompt_text(prompt=prompt, data_dict=data_dict, field_names=field_names)
