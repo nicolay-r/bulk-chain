@@ -90,6 +90,18 @@ python3 -m bulk_chain.infer \
     --api_token "<REPLICATE-API-TOKEN>"
 ```
 
+Or, you can launch **demo mode** to interact with LLM via command line: 
+> **NOTE:** Demo supports streaming!
+```bash
+python3 -m bulk_chain.demo \
+    --schema "test/schema/thor_cot_schema.json" \
+    --adapter "dynamic:replicate_104.py:Replicate" \
+    %%m \
+    --model_name "meta/meta-llama-3-70b-instruct" \
+    --api_token "<REPLICATE-API-TOKEN>" \
+    --stream
+```
+
 # Embed your LLM
 
 All you have to do is to implement `BaseLM` class, that includes:
