@@ -22,13 +22,11 @@ from bulk_chain.core.utils import dynamic_init, find_by_prefix, handle_table_nam
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-
 WRITER_PROVIDERS = {
     "sqlite": lambda filepath, table_name, data_it, infer_data_func, **kwargs: SQLite3Service.write(
         data_it=data_it, target=filepath, table_name=table_name, data2col_func=infer_data_func,
         skip_existed=True, **kwargs)
 }
-
 
 READER_PROVIDERS = {
     "sqlite": lambda filepath, table_name: SQLite3Service.read(filepath, table=table_name)
@@ -88,9 +86,12 @@ def iter_content_cached(input_dicts_it, llm, schema, cache_target, limit_prompt=
     return READER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table)
 
 
-def read_json(filepath):
-    with open(filepath, "r") as json_data:
-        return json.load(json_data)
+def read_json(filepaths):
+    d = {}
+    for fp in filepaths:
+        with open(fp, "r") as json_data:
+            d |= json.load(json_data)
+    return d
 
 
 if __name__ == '__main__':
@@ -99,7 +100,7 @@ if __name__ == '__main__':
     parser.add_argument('--adapter', dest='adapter', type=str, default=None)
     parser.add_argument('--attempts', dest='attempts', type=int, default=None)
     parser.add_argument('--id-col', dest='id_col', type=str, default="uid")
-    parser.add_argument('--src', dest='src', type=str, default=None)
+    parser.add_argument('--src', dest='src', type=str, nargs="*", default=None)
     parser.add_argument('--schema', dest='schema', type=str, default=None,
                         help="Path to the JSON file that describes schema")
     parser.add_argument('--to', dest='to', type=str, default=None, choices=["csv", "sqlite"])
@@ -131,9 +132,9 @@ if __name__ == '__main__':
     input_providers = {
         None: lambda _: chat_with_lm(llm,
                                      chain=schema.chain, model_name=llm_model_name),
-        "json": lambda filepath: chat_with_lm(llm,
-                                              preset_dict=read_json(filepath),
-                                              chain=schema.chain, model_name=llm_model_name),
+        "json": lambda filepaths: chat_with_lm(llm,
+                                               preset_dict=read_json(filepaths),
+                                               chain=schema.chain, model_name=llm_model_name),
         "csv": lambda filepath: CsvService.read(src=filepath, row_id_key=args.id_col,
                                                 as_dict=True, skip_header=True,
                                                 delimiter=csv_args_dict.get("delimiter", ","),
@@ -166,12 +167,17 @@ if __name__ == '__main__':
     tgt_filepath, tgt_ext, tgt_meta = parse_filepath(args.output, default_ext=args.to)
 
     # Input extension type defines the provider.
-    src_filepath, src_ext, src_meta = parse_filepath(args.src)
+    if isinstance(args.src, str):
+        args.src = [args.src]
+    sources = [parse_filepath(s) for s in args.src]
 
     # Check whether we are in chat mode.
-    if src_ext in [None, "json"]:
-        input_providers[src_ext](src_filepath)
+    if sources[0][1] in [None, "json"]:
+        input_providers[sources[0][1]]([fp for fp, _, _ in sources])
         exit(0)
+
+    # We do not support multiple files for other modes.
+    src_filepath, src_ext, src_meta = sources[0]
 
     def default_output_file_template(ext):
         # This is a default template for output files to be generated.
