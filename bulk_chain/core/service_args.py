@@ -12,6 +12,11 @@ class CmdArgsService:
     def iter_arguments(lst):
 
         def __release():
+
+            # We use the True value by default to treat the related parameter as flag.
+            if len(buf) == 0:
+                buf.append(True)
+
             return key, buf if len(buf) > 1 else buf[0]
 
         key = None
@@ -29,7 +34,7 @@ class CmdArgsService:
                 buf.append(a)
 
         # Sharing the remaining params.
-        if len(buf) > 0:
+        if key is not None:
             yield __release()
 
     @staticmethod
