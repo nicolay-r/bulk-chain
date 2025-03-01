@@ -1,4 +1,3 @@
-import json
 from os.path import join, basename
 
 import argparse
@@ -10,14 +9,13 @@ from source_iter.service_jsonl import JsonlService
 from source_iter.service_sqlite import SQLite3Service
 from tqdm import tqdm
 
-from bulk_chain.api import INFER_MODES, _infer_batch, CWD
+from bulk_chain.api import INFER_MODES, _infer_batch, CWD, init_llm
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_args import CmdArgsService
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
-from bulk_chain.core.service_llm import chat_with_lm
 from bulk_chain.core.service_schema import SchemaService
-from bulk_chain.core.utils import dynamic_init, find_by_prefix, handle_table_name, optional_limit_iter, parse_filepath
+from bulk_chain.core.utils import handle_table_name, optional_limit_iter, parse_filepath
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -31,26 +29,6 @@ WRITER_PROVIDERS = {
 READER_PROVIDERS = {
     "sqlite": lambda filepath, table_name: SQLite3Service.read(filepath, table=table_name)
 }
-
-
-def init_llm(**model_kwargs):
-    """ This method perform dynamic initialization of LLM from third-party resource.
-    """
-
-    # List of the Supported models and their API wrappers.
-    models_preset = {
-        "dynamic": lambda: dynamic_init(class_dir=CWD, class_filepath=llm_model_name,
-                                        class_name=llm_model_params)(**model_kwargs)
-    }
-
-    # Initialize LLM model.
-    params = args.adapter.split(':')
-    llm_model_type = params[0]
-    llm_model_name = params[1] if len(params) > 1 else params[-1]
-    llm_model_params = ':'.join(params[2:]) if len(params) > 2 else None
-    llm = find_by_prefix(d=models_preset, key=llm_model_type)()
-
-    return llm, llm_model_name
 
 
 def iter_content_cached(input_dicts_it, llm, schema, cache_target, limit_prompt=None, **cache_kwargs):
@@ -86,21 +64,13 @@ def iter_content_cached(input_dicts_it, llm, schema, cache_target, limit_prompt=
     return READER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table)
 
 
-def read_json(filepaths):
-    d = {}
-    for fp in filepaths:
-        with open(fp, "r") as json_data:
-            d |= json.load(json_data)
-    return d
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Infer Instruct LLM inference based on CoT schema")
     parser.add_argument('--adapter', dest='adapter', type=str, default=None)
     parser.add_argument('--attempts', dest='attempts', type=int, default=None)
     parser.add_argument('--id-col', dest='id_col', type=str, default="uid")
-    parser.add_argument('--src', dest='src', type=str, nargs="*", default=None)
+    parser.add_argument('--src', dest='src', type=str, nargs="?", default=None)
     parser.add_argument('--schema', dest='schema', type=str, default=None,
                         help="Path to the JSON file that describes schema")
     parser.add_argument('--to', dest='to', type=str, default=None, choices=["csv", "sqlite"])
@@ -121,7 +91,7 @@ if __name__ == '__main__':
     # Extract model-related arguments and Initialize Large Language Model.
     model_args = CmdArgsService.find_grouped_args(lst=sys.argv, starts_with="%%m", end_prefix="%%")
     model_args_dict = CmdArgsService.args_to_dict(model_args) | {"attempts": args.attempts}
-    llm, llm_model_name = init_llm(**model_args_dict)
+    llm, llm_model_name = init_llm(adapter=args.adapter, **model_args_dict)
 
     # Setup schema.
     schema = SchemaService(json_data=JsonService.read(args.schema))
@@ -130,11 +100,6 @@ if __name__ == '__main__':
         logger.info(f"Using schema: {schema_name}")
 
     input_providers = {
-        None: lambda _: chat_with_lm(llm,
-                                     chain=schema.chain, model_name=llm_model_name),
-        "json": lambda filepaths: chat_with_lm(llm,
-                                               preset_dict=read_json(filepaths),
-                                               chain=schema.chain, model_name=llm_model_name),
         "csv": lambda filepath: CsvService.read(src=filepath, row_id_key=args.id_col,
                                                 as_dict=True, skip_header=True,
                                                 delimiter=csv_args_dict.get("delimiter", ","),
@@ -166,18 +131,8 @@ if __name__ == '__main__':
     args.output = args.output.format(model=llm.name()) if args.output is not None else args.output
     tgt_filepath, tgt_ext, tgt_meta = parse_filepath(args.output, default_ext=args.to)
 
-    # Input extension type defines the provider.
-    if isinstance(args.src, str):
-        args.src = [args.src]
-    sources = [parse_filepath(s) for s in args.src]
-
-    # Check whether we are in chat mode.
-    if sources[0][1] in [None, "json"]:
-        input_providers[sources[0][1]]([fp for fp, _, _ in sources])
-        exit(0)
-
     # We do not support multiple files for other modes.
-    src_filepath, src_ext, src_meta = sources[0]
+    src_filepath, src_ext, src_meta = parse_filepath(args.src)
 
     def default_output_file_template(ext):
         # This is a default template for output files to be generated.

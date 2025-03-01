@@ -1,8 +1,7 @@
-import logging
-
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.utils import iter_params
+from bulk_chain.core.utils_logger import StreamedLogger
 
 
 def pad_str(text, pad):
@@ -23,22 +22,22 @@ def nice_output(text, width, pad=4, remove_new_line=False):
     return text_wrap(content=short_text, width=width, handle_line=lambda line: pad_str(line, pad=pad))
 
 
-def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None):
+def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, line_width=80, pad=0):
     assert (isinstance(lm, BaseLM))
     assert (isinstance(chain, list))
     assert (isinstance(model_name, str) or model_name is None)
 
     preset_dict = {} if preset_dict is None else preset_dict
 
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.INFO)
+    streamed_logger = StreamedLogger(__name__)
 
     do_exit = False
     model_name = model_name if model_name is not None else "agent"
 
     while not do_exit:
 
-        logger.info("----------------")
+        streamed_logger.info("----------------")
+        streamed_logger.info("\n")
 
         # Launching the CoT engine loop.
         data_dict = {} | preset_dict
@@ -80,14 +79,25 @@ def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None):
             actual_prompt = DataService.get_prompt_text(prompt=prompt, data_dict=data_dict)
 
             # Returning meta information, passed to LLM.
-            pad = 4
-            logger.info(pad_str(f"{model_name} (ask) ->", pad=pad))
-            logger.info(nice_output(actual_prompt, pad=pad*2, remove_new_line=True, width=80))
+            streamed_logger.info(pad_str(f"{model_name} (ask [{chain_ind+1}/{len(chain)}]) ->", pad=pad))
+            streamed_logger.info("\n")
+            streamed_logger.info(nice_output(actual_prompt, pad=pad, remove_new_line=True, width=line_width))
+            streamed_logger.info("\n\n")
 
             # Response.
-            response_batch = lm.ask_core(batch=[actual_prompt])
-            logger.info(pad_str(f"{model_name} (resp)->", pad=pad))
-            logger.info(nice_output(response_batch[0], pad=pad * 2, remove_new_line=False, width=80))
+            response = lm.ask_core(batch=[actual_prompt])[0]
+            streamed_logger.info(pad_str(f"{model_name} (resp [{chain_ind+1}/{len(chain)}])->", pad=pad))
+            streamed_logger.info("\n")
+            if isinstance(response, str):
+                streamed_logger.info(nice_output(response, pad=pad, remove_new_line=False, width=line_width))
+                buffer = [response]
+            else:
+                buffer = []
+                for chunk in response:
+                    streamed_logger.info(chunk)
+                    buffer.append(str(chunk))
+
+            streamed_logger.info("\n\n")
 
             # Collecting the answer for the next turn.
-            data_dict[prompt_args["out"]] = response_batch[0]
+            data_dict[prompt_args["out"]] = "".join(buffer)
