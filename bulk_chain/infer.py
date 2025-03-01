@@ -1,3 +1,4 @@
+import json
 from os.path import join, basename
 
 import argparse
@@ -87,6 +88,11 @@ def iter_content_cached(input_dicts_it, llm, schema, cache_target, limit_prompt=
     return READER_PROVIDERS["sqlite"](filepath=cache_filepath, table_name=cache_table)
 
 
+def read_json(filepath):
+    with open(filepath, "r") as json_data:
+        return json.load(json_data)
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Infer Instruct LLM inference based on CoT schema")
@@ -123,7 +129,11 @@ if __name__ == '__main__':
         logger.info(f"Using schema: {schema_name}")
 
     input_providers = {
-        None: lambda _: chat_with_lm(llm, chain=schema.chain, model_name=llm_model_name),
+        None: lambda _: chat_with_lm(llm,
+                                     chain=schema.chain, model_name=llm_model_name),
+        "json": lambda filepath: chat_with_lm(llm,
+                                              preset_dict=read_json(filepath),
+                                              chain=schema.chain, model_name=llm_model_name),
         "csv": lambda filepath: CsvService.read(src=filepath, row_id_key=args.id_col,
                                                 as_dict=True, skip_header=True,
                                                 delimiter=csv_args_dict.get("delimiter", ","),
@@ -159,8 +169,8 @@ if __name__ == '__main__':
     src_filepath, src_ext, src_meta = parse_filepath(args.src)
 
     # Check whether we are in chat mode.
-    if src_ext is None:
-        input_providers[src_ext](None)
+    if src_ext in [None, "json"]:
+        input_providers[src_ext](src_filepath)
         exit(0)
 
     def default_output_file_template(ext):

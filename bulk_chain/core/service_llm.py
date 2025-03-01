@@ -23,10 +23,12 @@ def nice_output(text, width, pad=4, remove_new_line=False):
     return text_wrap(content=short_text, width=width, handle_line=lambda line: pad_str(line, pad=pad))
 
 
-def chat_with_lm(lm, chain=None, model_name=None):
+def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None):
     assert (isinstance(lm, BaseLM))
     assert (isinstance(chain, list))
     assert (isinstance(model_name, str) or model_name is None)
+
+    preset_dict = {} if preset_dict is None else preset_dict
 
     logger = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO)
@@ -39,7 +41,7 @@ def chat_with_lm(lm, chain=None, model_name=None):
         logger.info("----------------")
 
         # Launching the CoT engine loop.
-        data_dict = {}
+        data_dict = {} | preset_dict
         for prompt_args in chain:
 
             # Processing the prompt.
@@ -60,6 +62,10 @@ def chat_with_lm(lm, chain=None, model_name=None):
                     break
 
                 data_dict[f_name] = user_input
+                
+            user_input = input(f"Enter to continue (or 'exit' to quit) ...")
+            if user_input.lower() == 'exit':
+                do_exit = True
 
             if do_exit:
                 break
