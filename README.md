@@ -66,11 +66,32 @@ Preliminary steps:
 1. Define your [schema](#chain-of-thought-schema) ([Example for Sentiment Analysis](/ext/schema/thor_cot_schema.json)))
 2. Wrap or pick **LLM model** from the [<b>Third-party providers hosting</b>↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
 
-## API
-
-Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/bulk-chain/wiki)
-
 ## Shell
+
+### Demo Mode
+
+**demo mode** to interact with LLM via command line with LLM output streaming support. 
+The video below illustrates an example of application for sentiment analysis on author opinion extraction towards mentioned object in text.
+
+Quck start with launching demo:
+1. ⬇️ Download [replicate](https://replicate.com/) provider for `bulk-chain`:
+2. 📜 Setup your reasoning `thor_cot_schema.json` according to the [following example ↗️](test/schema/thor_cot_schema.json)
+3. 🚀 Launch `demo.py` as follows:
+```bash
+python3 -m bulk_chain.demo \
+    --schema "test/schema/thor_cot_schema.json" \
+    --adapter "dynamic:replicate_104.py:Replicate" \
+    %%m \
+    --model_name "meta/meta-llama-3-70b-instruct" \
+    --api_token "<REPLICATE-API-TOKEN>" \
+    --stream
+```
+
+📺 This video showcase application of the [↗️ Sentiment Analysis Schema](https://github.com/nicolay-r/bulk-chain/blob/master/test/schema/thor_cot_schema.json) towards [LLaMA-3-70B-Instruct](https://replicate.com/meta/meta-llama-3-70b-instruct) hosted by Replicate for reasoning over submitted texts
+![sa-bulk-chain-cot-final](https://github.com/user-attachments/assets/0cc8fdcb-6ddb-44a3-8f05-d76250ae6423)
+
+
+### Inference Mode
 
 > **NOTE:** You have to install `source-iter` and `tqdm` packages that actual [dependencies](dependencies.txt) of this project
 
@@ -90,17 +111,10 @@ python3 -m bulk_chain.infer \
     --api_token "<REPLICATE-API-TOKEN>"
 ```
 
-Or, you can launch **demo mode** to interact with LLM via command line: 
-> **NOTE:** Demo supports streaming!
-```bash
-python3 -m bulk_chain.demo \
-    --schema "test/schema/thor_cot_schema.json" \
-    --adapter "dynamic:replicate_104.py:Replicate" \
-    %%m \
-    --model_name "meta/meta-llama-3-70b-instruct" \
-    --api_token "<REPLICATE-API-TOKEN>" \
-    --stream
-```
+## API
+
+Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/bulk-chain/wiki)
+
 
 # Embed your LLM
 
