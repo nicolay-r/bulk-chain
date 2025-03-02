@@ -68,7 +68,6 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Infer Instruct LLM inference based on CoT schema")
     parser.add_argument('--adapter', dest='adapter', type=str, default=None)
-    parser.add_argument('--attempts', dest='attempts', type=int, default=None)
     parser.add_argument('--id-col', dest='id_col', type=str, default="uid")
     parser.add_argument('--src', dest='src', type=str, nargs="?", default=None)
     parser.add_argument('--schema', dest='schema', type=str, default=None,
