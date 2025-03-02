@@ -8,21 +8,12 @@ def pad_str(text, pad):
     return text.rjust(len(text) + pad, ' ')
 
 
-def text_wrap(content, width, handle_line=lambda l: l):
-    lines = []
-    for text in content.split('\n'):
-        for i in range(0, len(text), width):
-            line = handle_line(text[i:i + width])
-            lines.append(line)
-    return '\n'.join(lines)
-
-
-def nice_output(text, width, pad=4, remove_new_line=False):
+def nice_output(text, remove_new_line=False):
     short_text = text.replace("\n", "") if remove_new_line else text
-    return text_wrap(content=short_text, width=width, handle_line=lambda line: pad_str(line, pad=pad))
+    return short_text
 
 
-def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, line_width=80, pad=0):
+def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, pad=0):
     assert (isinstance(lm, BaseLM))
     assert (isinstance(chain, list))
     assert (isinstance(model_name, str) or model_name is None)
@@ -81,7 +72,7 @@ def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, line_width=8
             # Returning meta information, passed to LLM.
             streamed_logger.info(pad_str(f"{model_name} (ask [{chain_ind+1}/{len(chain)}]) ->", pad=pad))
             streamed_logger.info("\n")
-            streamed_logger.info(nice_output(actual_prompt, pad=pad, remove_new_line=True, width=line_width))
+            streamed_logger.info(nice_output(actual_prompt, remove_new_line=True))
             streamed_logger.info("\n\n")
 
             # Response.
@@ -89,7 +80,7 @@ def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, line_width=8
             streamed_logger.info(pad_str(f"{model_name} (resp [{chain_ind+1}/{len(chain)}])->", pad=pad))
             streamed_logger.info("\n")
             if isinstance(response, str):
-                streamed_logger.info(nice_output(response, pad=pad, remove_new_line=False, width=line_width))
+                streamed_logger.info(nice_output(response, remove_new_line=False))
                 buffer = [response]
             else:
                 buffer = []
