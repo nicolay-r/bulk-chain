@@ -1,6 +1,0 @@
-{
-  "name": "default",
-  "schema": [
-    {"prompt": "{text}", "out": "response"}
-  ]
-}
