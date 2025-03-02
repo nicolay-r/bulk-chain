@@ -10,6 +10,8 @@
 
 <p align="center">
   <a href="https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm"><b>Third-party providers hosting</b>↗️</a>
+  <br>
+  <a href="https://github.com/nicolay-r/bulk-chain/blob/master/README.md#demo-mode">👉<b>demo</b>👈</a>
 </p>
 
 A no-strings-attached **framework**  for your LLM that allows applying Chain-of-Thought-alike [prompt `schema`](#chain-of-thought-schema) towards a massive textual collections using custom **[third-party providers ↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm)**.
