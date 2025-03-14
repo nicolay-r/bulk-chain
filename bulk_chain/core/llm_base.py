@@ -24,7 +24,7 @@ class BaseLM(object):
             try:
                 if self.__support_batching:
                     # Launch in batch mode.
-                    content = self.ask(batch)
+                    content = batch
                 else:
                     # Launch in non-batch mode.
                     assert len(batch) == 1, "The LM does not support batching," \
