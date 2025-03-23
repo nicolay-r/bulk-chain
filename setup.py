@@ -15,7 +15,7 @@ def get_requirements(filenames):
 
 setup(
     name='bulk_chain',
-    version='0.25.2',
+    version='0.25.3',
     python_requires=">=3.6",
     description='A lightweight, no-strings-attached Chain-of-Thought framework for your LLM, '
                 'ensuring reliable results for bulk input requests.',
