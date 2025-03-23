@@ -39,7 +39,8 @@ def infer_batch(batch, columns=None, **kwargs):
     return _infer_batch(batch=batch, cols=cols, **kwargs)
 
 
-def iter_content_cached(input_dicts_it, llm, schema, cache_target, batch_size, limit_prompt=None, **cache_kwargs):
+def iter_content_cached(input_dicts_it, llm, schema, cache_target, batch_size, id_column_name, limit_prompt=None,
+                        **cache_kwargs):
     assert (isinstance(llm, BaseLM))
     assert (isinstance(cache_target, str))
 
@@ -49,16 +50,22 @@ def iter_content_cached(input_dicts_it, llm, schema, cache_target, batch_size, l
     if isinstance(schema, dict):
         schema = SchemaService(json_data=schema)
 
+    # Parse target.
+    cache_filepath, _, cache_table = parse_filepath(filepath=cache_target)
+
     # Iterator of the queries.
     prompts_it = map(
         lambda data: DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args),
         input_dicts_it
     )
 
-    # TODO. Support iteration of data from cache first.
     prompts_batched_it = BatchIterator(
-        data_iter=iter(tqdm(prompts_it), desc="Iter Content"),
-        batch_size=batch_size)
+        data_iter=iter(tqdm(prompts_it, desc="Iter Content")),
+        batch_size=batch_size,
+        filter_func=lambda data: not SQLite3Service.entry_exist(
+            id_column_name=id_column_name, table_name=cache_table, target=cache_filepath,
+            id_value=data[id_column_name], **cache_kwargs)
+    )
 
     results_it = map(
         lambda batch: infer_batch(
@@ -68,13 +75,12 @@ def iter_content_cached(input_dicts_it, llm, schema, cache_target, batch_size, l
         prompts_batched_it
     )
 
-    # Parse target.
-    cache_filepath, _, cache_table = parse_filepath(filepath=cache_target)
-
     # Perform caching first.
     WRITER_PROVIDERS["sqlite"](
-        filepath=cache_filepath, table_name=cache_table,
+        filepath=cache_filepath,
+        table_name=cache_table,
         data_it=chain.from_iterable(results_it),
+        id_column_name=id_column_name,
         **cache_kwargs)
 
     # Then retrieve data.
