@@ -9,9 +9,8 @@ from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_schema import SchemaService
 from bulk_chain.core.utils import dynamic_init, find_by_prefix
 
+
 INFER_MODES = {
-    "default": lambda llm, prompt, limit_prompt=None: llm.ask_core(
-        prompt[:limit_prompt] if limit_prompt is not None else prompt),
     "batch": lambda llm, batch, limit_prompt=None: llm.ask_core(
         DataService.limit_prompts(batch, limit=limit_prompt))
 }
@@ -82,6 +81,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True, l
 def init_llm(adapter, **model_kwargs):
     """ This method perform dynamic initialization of LLM from third-party resource.
     """
+    assert (isinstance(adapter, str))
 
     # List of the Supported models and their API wrappers.
     models_preset = {

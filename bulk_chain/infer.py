@@ -1,3 +1,4 @@
+from itertools import chain
 from os.path import join, basename
 
 import argparse
@@ -12,6 +13,7 @@ from tqdm import tqdm
 from bulk_chain.api import INFER_MODES, _infer_batch, CWD, init_llm
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_args import CmdArgsService
+from bulk_chain.core.service_batch import BatchIterator
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_schema import SchemaService
@@ -21,9 +23,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 WRITER_PROVIDERS = {
-    "sqlite": lambda filepath, table_name, data_it, infer_data_func, **kwargs: SQLite3Service.write(
-        data_it=data_it, target=filepath, table_name=table_name, data2col_func=infer_data_func,
-        skip_existed=True, **kwargs)
+    "sqlite": lambda filepath, table_name, data_it, **kwargs: SQLite3Service.write(
+        data_it=data_it, target=filepath, table_name=table_name, skip_existed=True, **kwargs)
 }
 
 READER_PROVIDERS = {
@@ -31,7 +32,14 @@ READER_PROVIDERS = {
 }
 
 
-def iter_content_cached(input_dicts_it, llm, schema, cache_target, limit_prompt=None, **cache_kwargs):
+def infer_batch(batch, columns=None, **kwargs):
+    assert (len(batch) > 0)
+    # TODO. Support proper selection of columns.
+    cols = batch[0].keys() if columns is None else columns
+    return _infer_batch(batch=batch, cols=cols, **kwargs)
+
+
+def iter_content_cached(input_dicts_it, llm, schema, cache_target, batch_size, limit_prompt=None, **cache_kwargs):
     assert (isinstance(llm, BaseLM))
     assert (isinstance(cache_target, str))
 
@@ -47,17 +55,26 @@ def iter_content_cached(input_dicts_it, llm, schema, cache_target, limit_prompt=
         input_dicts_it
     )
 
+    # TODO. Support iteration of data from cache first.
+    prompts_batched_it = BatchIterator(
+        data_iter=iter(tqdm(prompts_it), desc="Iter Content"),
+        batch_size=batch_size)
+
+    results_it = map(
+        lambda batch: infer_batch(
+            batch=batch, schema=schema,
+            infer_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt)
+        ),
+        prompts_batched_it
+    )
+
     # Parse target.
     cache_filepath, _, cache_table = parse_filepath(filepath=cache_target)
 
     # Perform caching first.
     WRITER_PROVIDERS["sqlite"](
         filepath=cache_filepath, table_name=cache_table,
-        data_it=tqdm(prompts_it, desc="Iter content"),
-        infer_data_func=lambda c, prompt: _infer_batch(
-            batch=[prompt], cols=[c],
-            infer_func=lambda batch: INFER_MODES["default"](llm, batch, limit_prompt),
-            schema=schema)[0][c],
+        data_it=chain.from_iterable(results_it),
         **cache_kwargs)
 
     # Then retrieve data.
@@ -76,6 +93,7 @@ if __name__ == '__main__':
     parser.add_argument('--output', dest='output', type=str, default=None)
     parser.add_argument('--limit', dest='limit', type=int, default=None,
                         help="Limit amount of source texts for prompting.")
+    parser.add_argument('--batch-size', dest='batch_size', type=int, default=1)
     parser.add_argument('--limit-prompt', dest="limit_prompt", type=int, default=None,
                         help="Optional trimming prompt by the specified amount of characters.")
 
@@ -89,7 +107,7 @@ if __name__ == '__main__':
 
     # Extract model-related arguments and Initialize Large Language Model.
     model_args = CmdArgsService.find_grouped_args(lst=sys.argv, starts_with="%%m", end_prefix="%%")
-    model_args_dict = CmdArgsService.args_to_dict(model_args) | {"attempts": args.attempts}
+    model_args_dict = CmdArgsService.args_to_dict(model_args) | {"attempts": 1}
     llm, llm_model_name = init_llm(adapter=args.adapter, **model_args_dict)
 
     # Setup schema.
@@ -148,6 +166,7 @@ if __name__ == '__main__':
                                   limit_prompt=args.limit_prompt,
                                   schema=schema,
                                   llm=llm,
+                                  batch_size=args.batch_size,
                                   id_column_name=args.id_col,
                                   cache_target=":".join([cache_filepath, cache_table]))
 
