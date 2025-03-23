@@ -7,11 +7,11 @@ import sys
 
 from source_iter.service_csv import CsvService
 from source_iter.service_jsonl import JsonlService
-from source_iter.service_sqlite import SQLite3Service
 from tqdm import tqdm
 
 from bulk_chain.api import INFER_MODES, _infer_batch, CWD, init_llm
 from bulk_chain.core.llm_base import BaseLM
+from bulk_chain.core.provider_sqlite import SQLite3Service
 from bulk_chain.core.service_args import CmdArgsService
 from bulk_chain.core.service_batch import BatchIterator
 from bulk_chain.core.service_dict import DictionaryService
