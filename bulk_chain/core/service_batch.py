@@ -26,7 +26,7 @@ class BatchIterator:
         self.__index = 0
         self.__batch_size = batch_size
         self.__end_value = end_value
-        self.__filter_func = lambda _: True if filter_func is None else filter_func
+        self.__filter_func = (lambda _: True) if filter_func is None else filter_func
 
     def __iter__(self):
         return self
