@@ -4,6 +4,7 @@ from os.path import join
 from bulk_chain.api import iter_content, CWD
 from bulk_chain.core.utils import dynamic_init
 from bulk_chain.infer import iter_content_cached
+from utils import current_dir
 
 
 class TestAPI(unittest.TestCase):
@@ -20,7 +21,8 @@ class TestAPI(unittest.TestCase):
     def test_iter_cached(self):
         data_it = iter_content_cached(input_dicts_it=self.it_data(20),
                                       llm=self.llm,
-                                      schema="../schema/default.json",
+                                      batch_size=1,
+                                      schema=join(current_dir, "schema/default.json"),
                                       # Cache-related extra parameters.
                                       cache_target="out.sqlite:content",
                                       id_column_name="ind")
@@ -33,7 +35,7 @@ class TestAPI(unittest.TestCase):
                                llm=self.llm,
                                batch_size=1,
                                return_batch=True,
-                               schema="../schema/default.json")
+                               schema=join(current_dir, "schema/default.json"))
 
         for data in data_it:
             print(data)
