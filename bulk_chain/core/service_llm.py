@@ -1,3 +1,4 @@
+from bulk_chain.api import _handle_entry
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.utils import iter_params
@@ -79,16 +80,13 @@ def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, pad=0):
             response = lm.ask_core(batch=[actual_prompt])[0]
             streamed_logger.info(pad_str(f"{model_name} (resp [{chain_ind+1}/{len(chain)}])->", pad=pad))
             streamed_logger.info("\n")
-            if isinstance(response, str):
-                streamed_logger.info(nice_output(response, remove_new_line=False))
-                buffer = [response]
-            else:
-                buffer = []
-                for chunk in response:
-                    streamed_logger.info(chunk)
-                    buffer.append(str(chunk))
+
+            complete_response = _handle_entry(
+                entry=response,
+                callback_str_func=lambda entry: streamed_logger.info(nice_output(response, remove_new_line=False)),
+                callback_stream_func=lambda entry, **kwargs: streamed_logger.info(entry))
 
             streamed_logger.info("\n\n")
 
             # Collecting the answer for the next turn.
-            data_dict[prompt_args["out"]] = "".join(buffer)
+            data_dict[prompt_args["out"]] = complete_response
