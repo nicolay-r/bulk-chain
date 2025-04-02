@@ -2,6 +2,7 @@ import importlib
 import logging
 import sys
 from collections import Counter
+from os.path import dirname, join, basename
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -82,13 +83,24 @@ def auto_import(name, is_class=False):
 
 
 def dynamic_init(class_dir, class_filepath, class_name=None):
-    sys.path.append(class_dir)
+
+    # Registering path.
+    target = join(class_dir, dirname(class_filepath))
+    logger.info(f"Adding sys path for `{target}`")
+    sys.path.insert(1, target)
     class_path_list = class_filepath.split('/')
-    class_path_list[-1] = '.'.join(class_path_list[-1].split('.')[:-1])
+
+    # Composing proper class name.
+    class_filename = basename(class_path_list[-1])
+    if class_filename.endswith(".py"):
+        class_filename = class_filename[:-len(".py")]
+
+    # Loading library.
     class_name = class_path_list[-1].title() if class_name is None else class_name
-    class_path = ".".join(class_path_list + [class_name])
+    class_path = ".".join([class_filename, class_name])
     logger.info(f"Dynamic loading for the file and class `{class_path}`")
     cls = auto_import(class_path, is_class=False)
+
     return cls
 
 
