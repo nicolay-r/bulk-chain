@@ -4,14 +4,14 @@ from os.path import join
 from bulk_chain.api import iter_content, CWD
 from bulk_chain.core.utils import dynamic_init
 from bulk_chain.infer import iter_content_cached
-from utils import current_dir
+from utils import current_dir, API_TOKEN
 
 
 class TestAPI(unittest.TestCase):
 
     llm = dynamic_init(class_dir=join(CWD, ".."),
                        class_filepath="providers/replicate_104.py",
-                       class_name="Replicate")(api_token="<API-KEY>",
+                       class_name="Replicate")(api_token=API_TOKEN,
                                                model_name="deepseek-ai/deepseek-r1")
 
     def it_data(self, n):
