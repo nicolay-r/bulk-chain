@@ -70,7 +70,7 @@ def _infer_batch(batch, schema, handle_batch_func, handle_missed_func, cols=None
 
     if cols is None:
         first_item = batch[0]
-        cols = first_item.keys() if cols is None else cols
+        cols = list(first_item.keys()) if cols is None else cols
 
     for c in cols:
         _update_batch_content(c=c, batch=batch, schema=schema,
