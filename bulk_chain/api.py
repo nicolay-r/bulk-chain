@@ -23,11 +23,11 @@ CWD = os.getcwd()
 def _handle_entry(entry, entry_info=None, **kwargs):
 
     if isinstance(entry, str):
-        kwargs.get("callback_str_func", lambda _: None)(entry, entry_info)
+        kwargs.get("callback_str_func", lambda *_: None)(entry, entry_info)
         return entry
     elif isinstance(entry, collections.abc.Iterable):
         chunks = []
-        h = kwargs.get("callback_stream_func", lambda _: None)
+        h = kwargs.get("callback_stream_func", lambda *_: None)
 
         h(None, entry_info | {"action": "start"})
 
