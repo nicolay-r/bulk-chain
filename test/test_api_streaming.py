@@ -21,23 +21,22 @@ class TestAPI_Streaming(unittest.TestCase):
 
         streamed_logger = StreamedLogger(__name__)
 
-        def callback(chunk, info, reg):
-
-            if info["param"] not in reg:
-                current_field = info["param"]
-                streamed_logger.info(f"\n{current_field} (batch_ind={info['ind']}):\n")
-                reg.add(info["param"])
-
+        def callback(chunk, info):
+            if chunk is None and info["action"] == "start":
+                streamed_logger.info(f"\n{info['param']} (batch_ind={info['ind']}):\n")
+                return
+            if chunk is None and info["action"] == "end":
+                streamed_logger.info("\n\n")
+                return
             streamed_logger.info(chunk)
 
-        reg = set()
         input_dicts_it = iter_test_jsonl_samples()
         data_it = iter_content(input_dicts_it=input_dicts_it,
                                llm=self.llm,
                                return_batch=False,
-                               callback_stream_func=lambda chunk, info: callback(chunk, info, reg),
+                               callback_stream_func=callback,
+                               handle_missed_value_func=lambda *_: None,
                                schema="schema/thor_cot_schema.json")
 
         for _ in tqdm(data_it):
-            reg.clear()
             streamed_logger.info("\n|NEXT ENTRY|\n")
