@@ -20,35 +20,38 @@ INFER_MODES = {
 CWD = os.getcwd()
 
 
-def _handle_entry(entry, entry_info=None, callback_str_func=None, callback_stream_func=None):
-    assert (callable(callback_str_func) or callback_str_func is None)
-    assert (callable(callback_stream_func) or callback_stream_func is None)
+def _handle_entry(entry, entry_info=None, **kwargs):
 
     if isinstance(entry, str):
-        if callback_str_func is not None:
-            callback_str_func(entry, entry_info)
+        kwargs.get("callback_str_func", lambda _: None)(entry, entry_info)
         return entry
     elif isinstance(entry, collections.abc.Iterable):
         chunks = []
+        h = kwargs.get("callback_stream_func", lambda _: None)
+
+        h(None, entry_info | {"action": "start"})
+
         for chunk in map(lambda item: str(item), entry):
             chunks.append(chunk)
-            if callback_stream_func is None:
-                continue
-            callback_stream_func(chunk, entry_info)
+            h(chunk, entry_info)
+
+        h(None, entry_info | {"action": "end"})
+
         return "".join(chunks)
 
     raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
 
 
-def _update_batch_content(c, batch, schema, handle_batch_func, handle_missed_func, **kwargs):
+def _update_batch_content(c, batch, schema, **kwargs):
     assert (isinstance(batch, list))
     assert (isinstance(c, str))
 
     if c in schema.p2r:
         for batch_item in batch:
-            batch_item[c] = DataService.get_prompt_text(prompt=batch_item[c]["prompt"],
-                                                        data_dict=batch_item,
-                                                        handle_missed_func=handle_missed_func)
+            batch_item[c] = DataService.get_prompt_text(
+                prompt=batch_item[c]["prompt"],
+                data_dict=batch_item,
+                handle_missed_func=kwargs["handle_missed_value_func"])
     if c in schema.r2p:
         p_column = schema.r2p[c]
         # This instruction takes a lot of time in a non-batching mode.
@@ -56,14 +59,13 @@ def _update_batch_content(c, batch, schema, handle_batch_func, handle_missed_fun
             batch=batch,
             src_param=p_column,
             tgt_param=c,
-            handle_batch_func=lambda b: handle_batch_func(b),
+            handle_batch_func=lambda b: kwargs["handle_batch_func"](b),
             handle_entry_func=lambda entry, info: _handle_entry(entry=entry, entry_info=info, **kwargs)
         )
 
 
-def _infer_batch(batch, schema, handle_batch_func, handle_missed_func, cols=None, **kwargs):
+def _infer_batch(batch, schema, cols=None, **kwargs):
     assert (isinstance(batch, list))
-    assert (callable(handle_batch_func))
 
     if len(batch) == 0:
         return batch
@@ -73,16 +75,12 @@ def _infer_batch(batch, schema, handle_batch_func, handle_missed_func, cols=None
         cols = list(first_item.keys()) if cols is None else cols
 
     for c in cols:
-        _update_batch_content(c=c, batch=batch, schema=schema,
-                              handle_batch_func=handle_batch_func,
-                              handle_missed_func=handle_missed_func,
-                              **kwargs)
+        _update_batch_content(c=c, batch=batch, schema=schema, **kwargs)
 
     return batch
 
 
-def iter_content(input_dicts_it, llm, schema, batch_size=1, handle_missed_value_func=None,
-                 return_batch=True, limit_prompt=None, **callback_kwargs):
+def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True, limit_prompt=None, **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
@@ -102,9 +100,8 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, handle_missed_value_
 
     content_it = (_infer_batch(batch=batch,
                                handle_batch_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
-                               handle_missed_func=handle_missed_value_func,
                                schema=schema,
-                               **callback_kwargs)
+                               **kwargs)
                   for batch in BatchIterator(prompts_it, batch_size=batch_size))
 
     yield from content_it if return_batch else chain.from_iterable(content_it)

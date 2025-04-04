@@ -16,14 +16,8 @@ class DataService(object):
         return prompt.format(**fmt_d)
 
     @staticmethod
-    def __default_none_handler(col_name):
-        raise Exception(f"Can't compose prompt! Value for `{col_name}` is undefined!")
-
-    @staticmethod
     def get_prompt_text(prompt, data_dict, parse_fields_func=iter_params, handle_missed_func=None):
         field_names = list(parse_fields_func(prompt))
-
-        handle_missed_func = DataService.__default_none_handler if not handle_missed_func else handle_missed_func
 
         for col_name in field_names:
             if col_name not in data_dict:
