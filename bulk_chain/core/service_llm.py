@@ -1,4 +1,4 @@
-from bulk_chain.api import _handle_entry
+from bulk_chain.api import _handle_entry, iter_content
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.utils import iter_params
@@ -14,9 +14,8 @@ def nice_output(text, remove_new_line=False):
     return short_text
 
 
-def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, pad=0):
+def chat_with_lm(lm, preset_dict=None, schema=None, model_name=None, pad=0):
     assert (isinstance(lm, BaseLM))
-    assert (isinstance(chain, list))
     assert (isinstance(model_name, str) or model_name is None)
 
     preset_dict = {} if preset_dict is None else preset_dict
@@ -33,60 +32,36 @@ def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, pad=0):
 
         # Launching the CoT engine loop.
         data_dict = {} | preset_dict
-        for chain_ind, prompt_args in enumerate(chain):
 
-            # Processing the prompt.
-            prompt = prompt_args["prompt"]
+        def callback_str_func(entry, info):
+            #streamed_logger.info(pad_str(f"{model_name} (resp [{chain_ind + 1}/{len(schema.chain)}])->", pad=pad))
+            streamed_logger.info(nice_output(entry, remove_new_line=False))
 
-            # Filling necessary parameters.
-            user_informed = False
-            field_names = list(iter_params(prompt))
-            for ind, f_name in enumerate(field_names):
+        def handle_missed_value(col_name):
+            user_input = input(f"Enter your prompt for `{col_name}`"
+                               f"(or 'exit' to quit): ")
 
-                if f_name in data_dict:
-                    continue
+            if user_input.lower() == 'exit':
+                exit(0)
 
-                user_input = input(f"Enter your prompt for `{f_name}` ({ind+1}/{len(field_names)}) "
-                                   f"(or 'exit' to quit): ")
-                user_informed = True
+            return user_input
 
-                if user_input.lower() == 'exit':
-                    do_exit = True
-                    break
+        def callback_stream_func(entry, info):
+            #streamed_logger.info(pad_str(f"{model_name} (resp [{chain_ind + 1}/{len(schema.chain)}])->", pad=pad))
+            streamed_logger.info(entry)
 
-                data_dict[f_name] = user_input
+        content_it = iter_content(
+            input_dicts_it=[data_dict],
+            llm=lm,
+            schema=schema,
+            batch_size=1,
+            return_batch=True,
+            handle_missed_value_func=handle_missed_value,
+            callback_str_func=callback_str_func,
+            callback_stream_func=callback_stream_func,
+        )
 
-            if do_exit:
-                break
-
-            # In the case of the initial interaction with the chain.
-            # we make sure that aware user for starting interaction.
-            if chain_ind == 0 and not user_informed:
-                user_input = input(f"Enter to continue (or 'exit' to quit) ...")
-                if user_input.lower() == 'exit':
-                    do_exit = True
-
-            # Finally asking LLM.
-            DataService.compose_prompt_text(prompt=prompt, data_dict=data_dict, field_names=field_names)
-            actual_prompt = DataService.get_prompt_text(prompt=prompt, data_dict=data_dict)
-
-            # Returning meta information, passed to LLM.
-            streamed_logger.info(pad_str(f"{model_name} (ask [{chain_ind+1}/{len(chain)}]) ->", pad=pad))
-            streamed_logger.info("\n")
-            streamed_logger.info(nice_output(actual_prompt, remove_new_line=True))
-            streamed_logger.info("\n\n")
-
-            # Response.
-            response = lm.ask_core(batch=[actual_prompt])[0]
-            streamed_logger.info(pad_str(f"{model_name} (resp [{chain_ind+1}/{len(chain)}])->", pad=pad))
-            streamed_logger.info("\n")
-
-            complete_response = _handle_entry(
-                entry=response,
-                callback_str_func=lambda entry: streamed_logger.info(nice_output(response, remove_new_line=False)),
-                callback_stream_func=lambda entry, _: streamed_logger.info(entry))
-
-            streamed_logger.info("\n\n")
-
-            # Collecting the answer for the next turn.
-            data_dict[prompt_args["out"]] = complete_response
+        for _ in content_it:
+            user_input = input(f"Enter to continue (or 'exit' to quit) ...")
+            if user_input.lower() == 'exit':
+                do_exit = True
