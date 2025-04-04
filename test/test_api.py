@@ -35,6 +35,7 @@ class TestAPI(unittest.TestCase):
                                llm=self.llm,
                                batch_size=1,
                                return_batch=True,
+                               handle_missed_value_func=lambda *_: None,
                                schema=join(current_dir, "schema/default.json"))
 
         for data in data_it:

@@ -10,7 +10,7 @@ from utils import iter_test_jsonl_samples
 
 class TestProviderBatching(unittest.TestCase):
 
-    llm = dynamic_init(class_dir=join(CWD, ".."),
+    llm = dynamic_init(class_dir=join(CWD),
                        class_filepath="providers/transformers_flan_t5.py",
                        class_name="FlanT5")(model_name="nicolay-r/flan-t5-tsa-thor-base",
                                             max_new_tokens=128)
@@ -21,6 +21,7 @@ class TestProviderBatching(unittest.TestCase):
                                llm=self.llm,
                                batch_size=10,
                                return_batch=False,
+                               handle_missed_value_func=lambda *_: None,
                                schema="schema/thor_cot_schema.json")
 
         for item in tqdm(data_it):
