@@ -84,7 +84,7 @@ def chat_with_lm(lm, preset_dict=None, chain=None, model_name=None, pad=0):
             complete_response = _handle_entry(
                 entry=response,
                 callback_str_func=lambda entry: streamed_logger.info(nice_output(response, remove_new_line=False)),
-                callback_stream_func=lambda entry, **kwargs: streamed_logger.info(entry))
+                callback_stream_func=lambda entry, _: streamed_logger.info(entry))
 
             streamed_logger.info("\n\n")
 
