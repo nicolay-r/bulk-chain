@@ -39,6 +39,10 @@ def infer_batch(batch, columns=None, **kwargs):
     return _infer_batch(batch=batch, cols=cols, **kwargs)
 
 
+def raise_(ex):
+    raise ex
+
+
 def iter_content_cached(input_dicts_it, llm, schema, cache_target, batch_size, id_column_name, limit_prompt=None,
                         **cache_kwargs):
     assert (isinstance(llm, BaseLM))
@@ -70,7 +74,10 @@ def iter_content_cached(input_dicts_it, llm, schema, cache_target, batch_size, i
     results_it = map(
         lambda batch: infer_batch(
             batch=batch, schema=schema,
-            infer_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt)
+            handle_batch_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
+            handle_missed_value_func=lambda col_name: raise_(
+                Exception(f"Value for {col_name} is undefined. Filling undefined values is not supported")
+            )
         ),
         prompts_batched_it
     )
