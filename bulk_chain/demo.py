@@ -81,4 +81,4 @@ if __name__ == '__main__':
             preset_dict[key] = value
 
     # Launch Demo.
-    chat_with_lm(llm, preset_dict=preset_dict, chain=schema.chain, model_name=llm_model_name)
+    chat_with_lm(llm, preset_dict=preset_dict, schema=schema, model_name=llm_model_name)

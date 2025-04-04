@@ -40,13 +40,15 @@ def _handle_entry(entry, entry_info=None, callback_str_func=None, callback_strea
     raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
 
 
-def _update_batch_content(c, batch, schema, handle_batch_func, **kwargs):
+def _update_batch_content(c, batch, schema, handle_batch_func, handle_missed_func, **kwargs):
     assert (isinstance(batch, list))
     assert (isinstance(c, str))
 
     if c in schema.p2r:
         for batch_item in batch:
-            batch_item[c] = DataService.get_prompt_text(prompt=batch_item[c]["prompt"], data_dict=batch_item)
+            batch_item[c] = DataService.get_prompt_text(prompt=batch_item[c]["prompt"],
+                                                        data_dict=batch_item,
+                                                        handle_missed_func=handle_missed_func)
     if c in schema.r2p:
         p_column = schema.r2p[c]
         # This instruction takes a lot of time in a non-batching mode.
@@ -59,9 +61,9 @@ def _update_batch_content(c, batch, schema, handle_batch_func, **kwargs):
         )
 
 
-def _infer_batch(batch, schema, infer_func, cols=None, **kwargs):
+def _infer_batch(batch, schema, handle_batch_func, handle_missed_func, cols=None, **kwargs):
     assert (isinstance(batch, list))
-    assert (callable(infer_func))
+    assert (callable(handle_batch_func))
 
     if len(batch) == 0:
         return batch
@@ -71,13 +73,16 @@ def _infer_batch(batch, schema, infer_func, cols=None, **kwargs):
         cols = first_item.keys() if cols is None else cols
 
     for c in cols:
-        _update_batch_content(c=c, batch=batch, schema=schema, handle_batch_func=infer_func, **kwargs)
+        _update_batch_content(c=c, batch=batch, schema=schema,
+                              handle_batch_func=handle_batch_func,
+                              handle_missed_func=handle_missed_func,
+                              **kwargs)
 
     return batch
 
 
-def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True, limit_prompt=None,
-                 callback_stream_func=None):
+def iter_content(input_dicts_it, llm, schema, batch_size=1, handle_missed_value_func=None,
+                 return_batch=True, limit_prompt=None, **callback_kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
@@ -96,9 +101,10 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True, l
     )
 
     content_it = (_infer_batch(batch=batch,
-                               infer_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
+                               handle_batch_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
+                               handle_missed_func=handle_missed_value_func,
                                schema=schema,
-                               callback_stream_func=callback_stream_func)
+                               **callback_kwargs)
                   for batch in BatchIterator(prompts_it, batch_size=batch_size))
 
     yield from content_it if return_batch else chain.from_iterable(content_it)
