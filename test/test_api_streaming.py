@@ -48,7 +48,6 @@ class TestAPI_Streaming(unittest.TestCase):
         data_it = iter_content(input_dicts_it=input_dicts_it,
                                llm=self.llm,
                                batch_size=1,
-                               return_batch=False,
                                return_mode="chunk",
                                handle_missed_value_func=lambda *_: None,
                                schema="schema/thor_cot_schema.json")

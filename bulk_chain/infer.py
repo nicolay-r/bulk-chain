@@ -36,7 +36,7 @@ def infer_batch(batch, columns=None, **kwargs):
     assert (len(batch) > 0)
     # TODO. Support proper selection of columns.
     cols = batch[0].keys() if columns is None else columns
-    return _infer_batch(batch=batch, cols=cols, **kwargs)
+    return _infer_batch(batch=batch, cols=cols, return_mode="record", **kwargs)
 
 
 def raise_(ex):

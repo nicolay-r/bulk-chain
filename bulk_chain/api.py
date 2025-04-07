@@ -79,20 +79,24 @@ def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
                     chunks.append(chunk)
 
                     if return_mode == "chunk":
-                        yield ind_in_batch, c, chunk
+                        yield [ind_in_batch, c, chunk]
 
                 batch[ind_in_batch][c] = "".join(chunks)
+
+    if return_mode == "record":
+        for record in batch:
+            yield record
 
     if return_mode == "batch":
         yield batch
 
 
-def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True,
-                 limit_prompt=None, return_mode="batch", **kwargs):
+def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None, return_mode="batch", **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
     """
+    assert (return_mode in ["batch", "chunk"])
     assert (isinstance(llm, BaseLM))
 
     # Quick initialization of the schema.
@@ -102,7 +106,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True,
         schema = SchemaService(json_data=schema)
 
     prompts_it = map(
-        lambda data: DictionaryService.custom_update(src_dict=data, other_dict=schema.cot_args),
+        lambda data: DictionaryService.custom_update(src_dict=dict(data), other_dict=schema.cot_args),
         input_dicts_it
     )
 
@@ -113,7 +117,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True,
                                **kwargs)
                   for batch in BatchIterator(prompts_it, batch_size=batch_size))
 
-    yield from content_it if return_batch else chain.from_iterable(content_it)
+    yield from chain.from_iterable(content_it)
 
 
 def init_llm(adapter, **model_kwargs):
