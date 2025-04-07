@@ -47,6 +47,8 @@ def _iter_batch_prompts(c, batch_content_it, **kwargs):
 
 def _iter_batch_responses(p_column, c, batch_content_it, **kwargs):
     p_batch = [item[p_column] for item in batch_content_it]
+    # TODO. This part could be async.
+    # TODO. ind_in_batch might be a part of the async return.
     for ind_in_batch, entry in enumerate(kwargs["handle_batch_func"](p_batch)):
         yield ind_in_batch, _iter_entry_content(entry=entry, entry_info={"ind": ind_in_batch, "param": c}, **kwargs)
 
