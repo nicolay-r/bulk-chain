@@ -3,7 +3,7 @@ import os
 from itertools import chain
 
 from bulk_chain.core.llm_base import BaseLM
-from bulk_chain.core.service_batch import BatchIterator, BatchService
+from bulk_chain.core.service_batch import BatchIterator
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
@@ -20,51 +20,38 @@ INFER_MODES = {
 CWD = os.getcwd()
 
 
-def _handle_entry(entry, entry_info=None, **kwargs):
+def _iter_entry_content(entry, entry_info=None, **kwargs):
 
     if isinstance(entry, str):
         kwargs.get("callback_str_func", lambda *_: None)(entry, entry_info)
-        return entry
+        yield entry
     elif isinstance(entry, collections.abc.Iterable):
-        chunks = []
         h = kwargs.get("callback_stream_func", lambda *_: None)
-
         h(None, entry_info | {"action": "start"})
-
         for chunk in map(lambda item: str(item), entry):
-            chunks.append(chunk)
+            yield chunk
             h(chunk, entry_info)
-
         h(None, entry_info | {"action": "end"})
-
-        return "".join(chunks)
-
-    raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
+    else:
+        raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
 
 
-def _update_batch_content(c, batch, schema, **kwargs):
-    assert (isinstance(batch, list))
-    assert (isinstance(c, str))
-
-    if c in schema.p2r:
-        for batch_item in batch:
-            batch_item[c] = DataService.get_prompt_text(
-                prompt=batch_item[c]["prompt"],
-                data_dict=batch_item,
-                handle_missed_func=kwargs["handle_missed_value_func"])
-    if c in schema.r2p:
-        p_column = schema.r2p[c]
-        # This instruction takes a lot of time in a non-batching mode.
-        BatchService.handle_param_as_batch(
-            batch=batch,
-            src_param=p_column,
-            tgt_param=c,
-            handle_batch_func=lambda b: kwargs["handle_batch_func"](b),
-            handle_entry_func=lambda entry, info: _handle_entry(entry=entry, entry_info=info, **kwargs)
-        )
+def _iter_batch_prompts(c, batch_content_it, **kwargs):
+    for ind_in_batch, entry in enumerate(batch_content_it):
+        content = DataService.get_prompt_text(
+            prompt=entry[c]["prompt"],
+            data_dict=entry,
+            handle_missed_func=kwargs["handle_missed_value_func"])
+        yield ind_in_batch, content
 
 
-def _infer_batch(batch, schema, cols=None, **kwargs):
+def _iter_batch_responses(p_column, c, batch_content_it, **kwargs):
+    p_batch = [item[p_column] for item in batch_content_it]
+    for ind_in_batch, entry in enumerate(kwargs["handle_batch_func"](p_batch)):
+        yield ind_in_batch, _iter_entry_content(entry=entry, entry_info={"ind": ind_in_batch, "param": c}, **kwargs)
+
+
+def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
     assert (isinstance(batch, list))
 
     if len(batch) == 0:
@@ -75,12 +62,33 @@ def _infer_batch(batch, schema, cols=None, **kwargs):
         cols = list(first_item.keys()) if cols is None else cols
 
     for c in cols:
-        _update_batch_content(c=c, batch=batch, schema=schema, **kwargs)
 
-    return batch
+        # Handling prompt column.
+        if c in schema.p2r:
+            content_it = _iter_batch_prompts(c=c, batch_content_it=iter(batch), **kwargs)
+            for ind_in_batch, prompt in content_it:
+                batch[ind_in_batch][c] = prompt
+
+        # Handling column for inference.
+        if c in schema.r2p:
+            content_it = _iter_batch_responses(c=c, p_column=schema.r2p[c], batch_content_it=iter(batch), **kwargs)
+            for ind_in_batch, chunk_it in content_it:
+
+                chunks = []
+                for chunk in chunk_it:
+                    chunks.append(chunk)
+
+                    if return_mode == "chunk":
+                        yield ind_in_batch, c, chunk
+
+                batch[ind_in_batch][c] = "".join(chunks)
+
+    if return_mode == "batch":
+        yield batch
 
 
-def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True, limit_prompt=None, **kwargs):
+def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True,
+                 limit_prompt=None, return_mode="batch", **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
@@ -100,6 +108,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, return_batch=True, l
 
     content_it = (_infer_batch(batch=batch,
                                handle_batch_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
+                               return_mode=return_mode,
                                schema=schema,
                                **kwargs)
                   for batch in BatchIterator(prompts_it, batch_size=batch_size))

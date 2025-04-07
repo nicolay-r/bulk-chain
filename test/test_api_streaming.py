@@ -17,7 +17,7 @@ class TestAPI_Streaming(unittest.TestCase):
                                                model_name="meta/meta-llama-3-70b-instruct",
                                                stream=True)
 
-    def test_iter(self):
+    def test_callback_mode(self):
 
         streamed_logger = StreamedLogger(__name__)
 
@@ -40,3 +40,19 @@ class TestAPI_Streaming(unittest.TestCase):
 
         for _ in tqdm(data_it):
             streamed_logger.info("\n|NEXT ENTRY|\n")
+
+    def test_content_iter_mode(self):
+
+        streamed_logger = StreamedLogger(__name__)
+        input_dicts_it = iter_test_jsonl_samples()
+        data_it = iter_content(input_dicts_it=input_dicts_it,
+                               llm=self.llm,
+                               batch_size=1,
+                               return_batch=False,
+                               return_mode="chunk",
+                               handle_missed_value_func=lambda *_: None,
+                               schema="schema/thor_cot_schema.json")
+
+        for ind_in_batch, col, item in data_it:
+            streamed_logger.info("\t".join([str(ind_in_batch), str(col), item]))
+            streamed_logger.info("\n")

@@ -1,22 +1,3 @@
-class BatchService(object):
-
-    @staticmethod
-    def handle_param_as_batch(batch, src_param, tgt_param, handle_batch_func, handle_entry_func):
-        assert (isinstance(batch, list))
-        assert (isinstance(src_param, str))
-        assert (callable(handle_batch_func))
-
-        _batch = [item[src_param] for item in batch]
-
-        # Do handling for the batch.
-        _handled_batch = handle_batch_func(_batch)
-        assert (isinstance(_handled_batch, list))
-
-        # Apply changes.
-        for i, item in enumerate(batch):
-            item[tgt_param] = handle_entry_func(entry=_handled_batch[i], info={"ind": i, "param": tgt_param})
-
-
 class BatchIterator:
 
     def __init__(self, data_iter, batch_size, end_value=None, filter_func=None):
