@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm"><b>Third-party providers hosting</b>↗️</a>
   <br>
-  <a href="https://github.com/nicolay-r/bulk-chain/blob/master/README.md#demo-mode">👉<b>demo</b>👈</a>
+  <a href="https://github.com/nicolay-r/bulk-chain-shell">👉<b>demo</b>👈</a>
 </p>
 
 A no-strings-attached **framework**  for your LLM that allows applying Chain-of-Thought-alike [prompt `schema`](#chain-of-thought-schema) towards a massive textual collections using custom **[third-party providers ↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm)**.
@@ -19,11 +19,7 @@ A no-strings-attached **framework**  for your LLM that allows applying Chain-of-
 ### Main Features
 * ✅ **No-strings**: you're free to LLM dependencies and flexible `venv` customization.
 * ✅ **Support schemas descriptions** for Chain-of-Thought concept.
-* ✅ **Provides iterator over infinite amount of input contexts** served in `CSV`/`JSONL`.
-
-### Extra Features
-* ✅ **Progress caching [for remote LLMs]**: withstanding exception during LLM calls by using `sqlite3` engine for caching LLM answers;
-
+* ✅ **Provides iterator over infinite amount of input contexts**
 
 # Installation
 
@@ -68,50 +64,7 @@ Preliminary steps:
 1. Define your [schema](#chain-of-thought-schema) ([Example for Sentiment Analysis](/ext/schema/thor_cot_schema.json)))
 2. Wrap or pick **LLM model** from the [<b>Third-party providers hosting</b>↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
 
-## Shell
 
-### Demo Mode
-
-**demo mode** to interact with LLM via command line with LLM output streaming support. 
-The video below illustrates an example of application for sentiment analysis on author opinion extraction towards mentioned object in text.
-
-Quck start with launching demo:
-1. ⬇️ Download [replicate](https://replicate.com/) provider for `bulk-chain`:
-2. 📜 Setup your reasoning `thor_cot_schema.json` according to the [following example ↗️](test/schema/thor_cot_schema.json)
-3. 🚀 Launch `demo.py` as follows:
-```bash
-python3 -m bulk_chain.demo \
-    --schema "test/schema/thor_cot_schema.json" \
-    --adapter "dynamic:replicate_104.py:Replicate" \
-    %%m \
-    --model_name "meta/meta-llama-3-70b-instruct" \
-    --api_token "<REPLICATE-API-TOKEN>" \
-    --stream
-```
-
-📺 This video showcase application of the [↗️ Sentiment Analysis Schema](https://github.com/nicolay-r/bulk-chain/blob/master/test/schema/thor_cot_schema.json) towards [LLaMA-3-70B-Instruct](https://replicate.com/meta/meta-llama-3-70b-instruct) hosted by Replicate for reasoning over submitted texts
-![sa-bulk-chain-cot-final](https://github.com/user-attachments/assets/0cc8fdcb-6ddb-44a3-8f05-d76250ae6423)
-
-
-### Inference Mode
-
-> **NOTE:** You have to install `source-iter` and `tqdm` packages that actual [dependencies](dependencies.txt) of this project
-
-1. ⬇️ Download [replicate](https://replicate.com/) provider for `bulk-chain`:
-```bash
-wget https://raw.githubusercontent.com/nicolay-r/nlp-thirdgate/refs/heads/master/llm/replicate_104.py
-```
-2. 📜 Setup your reasoning `schema.json` according to the [following example ↗️](test/schema/default.json)
-3. 🚀 Launch inference using `DeepSeek-R1`:
-```bash
-python3 -m bulk_chain.infer \
-    --src "<PATH-TO-YOUR-CSV-or-JSONL>" \
-    --schema "test/schema/default.json" \
-    --adapter "replicate_104.py:Replicate" \
-    %%m \
-    --model_name "deepseek-ai/deepseek-r1" \
-    --api_token "<REPLICATE-API-TOKEN>"
-```
 
 ## API
 

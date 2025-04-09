@@ -1,8 +1,6 @@
 import logging
 import time
 
-from bulk_chain.core.utils import format_model_name
-
 
 class BaseLM(object):
 
@@ -49,4 +47,4 @@ class BaseLM(object):
         raise NotImplemented()
 
     def name(self):
-        return format_model_name(self.__name)
+        return self.__name.replace("/", "_")

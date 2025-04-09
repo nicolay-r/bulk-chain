@@ -5,7 +5,6 @@ from tqdm import tqdm
 
 from bulk_chain.api import CWD, iter_content
 from bulk_chain.core.utils import dynamic_init
-from bulk_chain.core.utils_logger import StreamedLogger
 from utils import API_TOKEN, iter_test_jsonl_samples
 
 
@@ -19,16 +18,14 @@ class TestAPI_Streaming(unittest.TestCase):
 
     def test_callback_mode(self):
 
-        streamed_logger = StreamedLogger(__name__)
-
         def callback(chunk, info):
             if chunk is None and info["action"] == "start":
-                streamed_logger.info(f"\n{info['param']} (batch_ind={info['ind']}):\n")
+                print(f"\n{info['param']} (batch_ind={info['ind']}):\n")
                 return
             if chunk is None and info["action"] == "end":
-                streamed_logger.info("\n\n")
+                print("\n\n")
                 return
-            streamed_logger.info(chunk)
+            print(chunk, end="")
 
         input_dicts_it = iter_test_jsonl_samples()
         data_it = iter_content(input_dicts_it=input_dicts_it,
@@ -39,11 +36,10 @@ class TestAPI_Streaming(unittest.TestCase):
                                schema="schema/thor_cot_schema.json")
 
         for _ in tqdm(data_it):
-            streamed_logger.info("\n|NEXT ENTRY|\n")
+            print("\n|NEXT ENTRY|\n")
 
     def test_content_iter_mode(self):
 
-        streamed_logger = StreamedLogger(__name__)
         input_dicts_it = iter_test_jsonl_samples()
         data_it = iter_content(input_dicts_it=input_dicts_it,
                                llm=self.llm,
@@ -53,5 +49,4 @@ class TestAPI_Streaming(unittest.TestCase):
                                schema="schema/thor_cot_schema.json")
 
         for ind_in_batch, col, item in data_it:
-            streamed_logger.info("\t".join([str(ind_in_batch), str(col), item]))
-            streamed_logger.info("\n")
+            print("\t".join([str(ind_in_batch), str(col), item]))
