@@ -61,8 +61,9 @@ Below, is an example on how to declare your own schema:
 
 Preliminary steps:
 
-1. Define your [schema](#chain-of-thought-schema) ([Example for Sentiment Analysis](/ext/schema/thor_cot_schema.json)))
-2. Wrap or pick **LLM model** from the [<b>Third-party providers hosting</b>↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
+1. Define your [schema](#chain-of-thought-schema)
+    * [Example for Sentiment Analysis](test/schema/thor_cot_schema.json)
+3. Wrap or pick **LLM model** from the [<b>Third-party providers hosting</b>↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
 
 
 
