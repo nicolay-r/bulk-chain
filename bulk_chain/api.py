@@ -19,18 +19,13 @@ INFER_MODES = {
 CWD = os.getcwd()
 
 
-def _iter_entry_content(entry, entry_info=None, **kwargs):
+def _iter_entry_content(entry):
 
     if isinstance(entry, str):
-        kwargs.get("callback_str_func", lambda *_: None)(entry, entry_info)
         yield entry
     elif isinstance(entry, collections.abc.Iterable):
-        h = kwargs.get("callback_stream_func", lambda *_: None)
-        h(None, entry_info | {"action": "start"})
         for chunk in map(lambda item: str(item), entry):
             yield chunk
-            h(chunk, entry_info)
-        h(None, entry_info | {"action": "end"})
     else:
         raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
 
@@ -44,12 +39,12 @@ def _iter_batch_prompts(c, batch_content_it, **kwargs):
         yield ind_in_batch, content
 
 
-def _iter_batch_responses(p_column, c, batch_content_it, **kwargs):
+def _iter_batch_responses(p_column, batch_content_it, **kwargs):
     p_batch = [item[p_column] for item in batch_content_it]
     # TODO. This part could be async.
     # TODO. ind_in_batch might be a part of the async return.
     for ind_in_batch, entry in enumerate(kwargs["handle_batch_func"](p_batch)):
-        yield ind_in_batch, _iter_entry_content(entry=entry, entry_info={"ind": ind_in_batch, "param": c}, **kwargs)
+        yield ind_in_batch, _iter_entry_content(entry=entry)
 
 
 def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
@@ -72,7 +67,7 @@ def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
 
         # Handling column for inference.
         if c in schema.r2p:
-            content_it = _iter_batch_responses(c=c, p_column=schema.r2p[c], batch_content_it=iter(batch), **kwargs)
+            content_it = _iter_batch_responses(p_column=schema.r2p[c], batch_content_it=iter(batch), **kwargs)
             for ind_in_batch, chunk_it in content_it:
 
                 chunks = []
@@ -113,6 +108,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None, r
 
     content_it = (_infer_batch(batch=batch,
                                handle_batch_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
+                               handle_missed_value_func=lambda *_: None,
                                return_mode=return_mode,
                                schema=schema,
                                **kwargs)
