@@ -66,10 +66,29 @@ Preliminary steps:
 3. Wrap or pick **LLM model** from the [<b>Third-party providers hosting</b>↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
 
 
-
 ## API
 
 Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/bulk-chain/wiki)
+
+```python
+from bulk_chain.core.utils import dynamic_init
+from bulk_chain.api import iter_content
+
+llm = dynamic_init(class_dir=".",
+                   class_filepath="replicate_104.py",
+                   class_name="Replicate")(api_token="<API-KEY>")
+
+content_it = iter_content(
+    # 1. Your iterator of dictionaries
+    data_it,
+    # 2. Your third-party model implementation.
+    llm=llm,
+    # 3. Your schema.              
+    schema="schema.json")
+    
+for content in content_it:
+    # Handle your LLM responses here ...
+```
 
 
 # Embed your LLM
