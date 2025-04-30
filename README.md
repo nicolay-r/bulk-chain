@@ -59,30 +59,28 @@ Below, is an example on how to declare your own schema:
 
 # Usage
 
-Preliminary steps:
+## 🤖 Prepare 
 
-1. Define your [schema](#chain-of-thought-schema)
+1. [schema](#chain-of-thought-schema)
     * [Example for Sentiment Analysis](test/schema/thor_cot_schema.json)
-3. Wrap or pick **LLM model** from the [<b>Third-party providers hosting</b>↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
+2. **LLM model** from the [<b>Third-party providers hosting</b>↗️](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
+3. Data (iter of dictionaries)
 
+## 🚀 Launch
 
-## API
-
-Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/bulk-chain/wiki)
+> **API**: For more details see the [**related Wiki page**](https://github.com/nicolay-r/bulk-chain/wiki)
 
 ```python
 from bulk_chain.core.utils import dynamic_init
 from bulk_chain.api import iter_content
 
-llm = dynamic_init(class_filepath="replicate_104.py", class_name="Replicate")(api_token="<API-KEY>")
-
 content_it = iter_content(
-    # 1. Your iterator of dictionaries
-    data_it,
+    # 1. Your schema.              
+    schema="YOUR_SCHEMA.json",
     # 2. Your third-party model implementation.
-    llm=llm,
-    # 3. Your schema.              
-    schema="schema.json")
+    llm=dynamic_init(class_filepath="replicate_104.py", class_name="Replicate")(api_token="<API-KEY>"),
+    # 3. Your iterator of dictionaries
+    input_dicts_it=YOUR_DATA_IT)
     
 for content in content_it:
     # Handle your LLM responses here ...
