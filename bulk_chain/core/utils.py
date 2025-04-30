@@ -60,10 +60,10 @@ def auto_import(name, is_class=False):
     return m() if is_class else m
 
 
-def dynamic_init(class_dir, class_filepath, class_name=None):
+def dynamic_init(class_filepath, class_name=None):
 
     # Registering path.
-    target = join(class_dir, dirname(class_filepath))
+    target = join(dirname(class_filepath))
     logger.info(f"Adding sys path for `{target}`")
     sys.path.insert(1, target)
     class_path_list = class_filepath.split('/')

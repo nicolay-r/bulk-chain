@@ -1,15 +1,14 @@
 import unittest
 from os.path import join
 
-from bulk_chain.api import iter_content, CWD
+from bulk_chain.api import iter_content
 from bulk_chain.core.utils import dynamic_init
 from utils import current_dir, API_TOKEN
 
 
 class TestAPI(unittest.TestCase):
 
-    llm = dynamic_init(class_dir=join(CWD, ".."),
-                       class_filepath="providers/replicate_104.py",
+    llm = dynamic_init(class_filepath="providers/replicate_104.py",
                        class_name="Replicate")(api_token=API_TOKEN,
                                                model_name="deepseek-ai/deepseek-r1")
 

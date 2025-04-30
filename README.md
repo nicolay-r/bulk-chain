@@ -74,9 +74,7 @@ Please take a look at the [**related Wiki page**](https://github.com/nicolay-r/b
 from bulk_chain.core.utils import dynamic_init
 from bulk_chain.api import iter_content
 
-llm = dynamic_init(class_dir=".",
-                   class_filepath="replicate_104.py",
-                   class_name="Replicate")(api_token="<API-KEY>")
+llm = dynamic_init(class_filepath="replicate_104.py", class_name="Replicate")(api_token="<API-KEY>")
 
 content_it = iter_content(
     # 1. Your iterator of dictionaries

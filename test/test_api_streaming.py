@@ -7,8 +7,7 @@ from utils import API_TOKEN, iter_test_jsonl_samples
 
 class TestAPI_Streaming(unittest.TestCase):
 
-    llm = dynamic_init(class_dir=".",
-                       class_filepath="providers/replicate_104.py",
+    llm = dynamic_init(class_filepath="providers/replicate_104.py",
                        class_name="Replicate")(api_token=API_TOKEN,
                                                model_name="meta/meta-llama-3-70b-instruct",
                                                stream=True)
