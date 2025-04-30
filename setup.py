@@ -36,5 +36,4 @@ setup(
              'chain-of-thought, '
              'reasoning',
     packages=find_packages(),
-    install_requires=get_requirements(['dependencies.txt'])
 )
