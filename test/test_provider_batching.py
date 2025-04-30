@@ -21,7 +21,6 @@ class TestProviderBatching(unittest.TestCase):
                                llm=self.llm,
                                batch_size=10,
                                return_batch=False,
-                               handle_missed_value_func=lambda *_: None,
                                schema="schema/thor_cot_schema.json")
 
         for item in tqdm(data_it):

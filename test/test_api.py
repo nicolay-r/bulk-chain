@@ -22,7 +22,6 @@ class TestAPI(unittest.TestCase):
         data_it = iter_content(input_dicts_it=self.it_data(20),
                                llm=self.llm,
                                batch_size=1,
-                               handle_missed_value_func=lambda *_: None,
                                return_mode="batch",
                                schema=join(current_dir, "schema/default.json"))
 

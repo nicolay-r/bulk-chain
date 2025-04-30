@@ -32,7 +32,6 @@ class TestAPI_Streaming(unittest.TestCase):
                                llm=self.llm,
                                return_batch=False,
                                callback_stream_func=callback,
-                               handle_missed_value_func=lambda *_: None,
                                schema="schema/thor_cot_schema.json")
 
         for _ in tqdm(data_it):
@@ -45,7 +44,6 @@ class TestAPI_Streaming(unittest.TestCase):
                                llm=self.llm,
                                batch_size=1,
                                return_mode="chunk",
-                               handle_missed_value_func=lambda *_: None,
                                schema="schema/thor_cot_schema.json")
 
         for ind_in_batch, col, item in data_it:
