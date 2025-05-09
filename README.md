@@ -79,8 +79,12 @@ content_it = iter_content(
     schema="YOUR_SCHEMA.json",
     # 2. Your third-party model implementation.
     llm=dynamic_init(class_filepath="replicate_104.py", class_name="Replicate")(api_token="<API-KEY>"),
-    # 3. Your iterator of dictionaries
-    input_dicts_it=YOUR_DATA_IT)
+    # 3. Customize your inference and result providing modes: 
+    infer_mode="batch_async", 
+    return_mode="batch",
+    # 4. Your iterator of dictionaries
+    input_dicts_it=YOUR_DATA_IT,
+)
     
 for content in content_it:
     # Handle your LLM responses here ...
