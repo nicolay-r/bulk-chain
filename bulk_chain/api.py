@@ -3,6 +3,7 @@ import collections
 import logging
 import os
 from itertools import chain
+from typing import AsyncGenerator
 
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_asyncio import AsyncioService
@@ -15,8 +16,11 @@ from bulk_chain.core.utils import attempt_wrapper
 
 INFER_MODES = {
     "single": lambda llm, batch: [llm.ask(prompt) for prompt in batch],
+    "single_stream": lambda llm, batch: [llm.ask_stream(prompt) for prompt in batch],
     "batch": lambda llm, batch: llm.ask(batch),
-    "batch_async": lambda llm, batch: list(AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_async))
+    "batch_async": lambda llm, batch: AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_async),
+    # TODO. Here we actually have to launch async for over the results (aiter) of all outputs.
+    "batch_stream_async": lambda llm, batch: AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_stream_async)
 }
 
 
@@ -30,6 +34,8 @@ def _iter_entry_content(entry):
     elif isinstance(entry, collections.abc.Iterable):
         for chunk in map(lambda item: str(item), entry):
             yield chunk
+    elif isinstance(entry, AsyncGenerator):
+        raise Exception("Not Supported Yet!")
     else:
         raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
 
