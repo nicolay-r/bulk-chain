@@ -19,6 +19,7 @@ class TestAPI_Streaming(unittest.TestCase):
                                llm=self.llm,
                                batch_size=1,
                                return_mode="chunk",
+                               attempts=2,
                                schema="schema/thor_cot_schema.json")
 
         for ind_in_batch, col, item in data_it:

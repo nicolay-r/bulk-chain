@@ -1,6 +1,7 @@
 import importlib
 import logging
 import sys
+import time
 from collections import Counter
 from os.path import dirname, join, basename
 
@@ -89,3 +90,21 @@ def optional_limit_iter(it_data, limit=None):
         if limit is not None and counter["returned"] > limit:
             break
         yield data
+
+
+def attempt_wrapper(attempts, delay_sec=1, logger=None):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for i in range(attempts):
+                try:
+                    # Do action.
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if logger is not None:
+                        logger.info(f"Unable to infer the result. Try {i} out of {attempts}.")
+                        logger.info(e)
+                    if delay_sec is not None:
+                        time.sleep(delay_sec)
+            raise Exception(f"Failed after {attempts} attempts")
+        return wrapper
+    return decorator

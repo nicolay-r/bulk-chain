@@ -1,4 +1,5 @@
 import collections
+import logging
 import os
 from itertools import chain
 
@@ -8,7 +9,7 @@ from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_schema import SchemaService
-
+from bulk_chain.core.utils import attempt_wrapper
 
 INFER_MODES = {
     "batch": lambda llm, batch, limit_prompt=None: llm.ask_core(batch)
@@ -86,7 +87,8 @@ def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
         yield batch
 
 
-def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None, return_mode="batch", **kwargs):
+def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
+                 infer_mode="batch", return_mode="batch", attempts=1, **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
@@ -105,10 +107,23 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None, r
         input_dicts_it
     )
 
+    handle_batch_func = lambda batch: INFER_MODES[infer_mode](
+        llm, DataService.limit_prompts(batch, limit=limit_prompt)
+    )
+
+    # Optional setup of the logger.
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
+
+    # Optional wrapping into attempts.
+    if attempts > 1:
+        attempt_dec = attempt_wrapper(attempts=attempts,
+                                      delay_sec=kwargs.get("attempt_delay_sec", 1),
+                                      logger=logger)
+        handle_batch_func = attempt_dec(handle_batch_func)
+
     content_it = (_infer_batch(batch=batch,
-                               handle_batch_func=lambda batch: INFER_MODES["batch"](
-                                   llm, DataService.limit_prompts(batch, limit=limit_prompt)
-                               ),
+                               handle_batch_func=handle_batch_func,
                                handle_missed_value_func=lambda *_: None,
                                return_mode=return_mode,
                                schema=schema,
