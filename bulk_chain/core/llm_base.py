@@ -46,5 +46,5 @@ class BaseLM(object):
     def ask(self, content):
         raise NotImplemented()
 
-    def name(self):
-        return self.__name.replace("/", "_")
+    async def ask_async(self, content):
+        raise NotImplemented()
