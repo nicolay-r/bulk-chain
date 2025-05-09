@@ -113,12 +113,12 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
         llm, DataService.limit_prompts(batch, limit=limit_prompt)
     )
 
-    # Optional setup of the logger.
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.INFO)
-
     # Optional wrapping into attempts.
     if attempts > 1:
+        # Optional setup of the logger.
+        logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO)
+
         attempt_dec = attempt_wrapper(attempts=attempts,
                                       delay_sec=kwargs.get("attempt_delay_sec", 1),
                                       logger=logger)
