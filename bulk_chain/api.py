@@ -1,9 +1,11 @@
+import asyncio
 import collections
 import logging
 import os
 from itertools import chain
 
 from bulk_chain.core.llm_base import BaseLM
+from bulk_chain.core.service_asyncio import AsyncioService
 from bulk_chain.core.service_batch import BatchIterator
 from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_dict import DictionaryService
@@ -13,7 +15,8 @@ from bulk_chain.core.utils import attempt_wrapper
 
 INFER_MODES = {
     "single": lambda llm, batch: [llm.ask(prompt) for prompt in batch],
-    "batch": lambda llm, batch: llm.ask(batch)
+    "batch": lambda llm, batch: llm.ask(batch),
+    "batch_async": lambda llm, batch: list(AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_async))
 }
 
 

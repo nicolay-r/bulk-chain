@@ -5,3 +5,6 @@ class BaseLM(object):
 
     def ask(self, content):
         raise NotImplemented()
+
+    async def ask_async(self, prompt):
+        raise NotImplemented()

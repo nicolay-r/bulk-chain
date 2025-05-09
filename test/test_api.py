@@ -17,7 +17,7 @@ class TestAPI(unittest.TestCase):
         for i in range(n):
             yield {"ind": i, "text": "X invent sanctions against Y", "entity": "X"}
 
-    def test_iter(self):
+    def test_single(self):
         data_it = iter_content(input_dicts_it=self.it_data(20),
                                llm=self.llm,
                                batch_size=1,
@@ -27,6 +27,18 @@ class TestAPI(unittest.TestCase):
 
         for data in data_it:
             print(data)
+
+    def test_batch_async(self):
+        data_it = iter_content(input_dicts_it=self.it_data(20),
+                               llm=self.llm,
+                               batch_size=5,
+                               infer_mode="batch_async",
+                               return_mode="batch",
+                               schema=join(current_dir, "schema/default.json"))
+
+        for batch in data_it:
+            for item in batch:
+                print(item)
 
 
 if __name__ == '__main__':
