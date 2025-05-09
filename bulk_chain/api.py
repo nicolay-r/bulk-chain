@@ -12,7 +12,7 @@ from bulk_chain.core.service_schema import SchemaService
 from bulk_chain.core.utils import attempt_wrapper
 
 INFER_MODES = {
-    "batch": lambda llm, batch, limit_prompt=None: llm.ask_core(batch)
+    "batch": lambda llm, batch: llm.ask_core(batch)
 }
 
 
