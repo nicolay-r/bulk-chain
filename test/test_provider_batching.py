@@ -17,6 +17,7 @@ class TestProviderBatching(unittest.TestCase):
         input_dicts_it = iter_test_jsonl_samples()
         data_it = iter_content(input_dicts_it=input_dicts_it,
                                llm=self.llm,
+                               infer_mode="batch",
                                batch_size=10,
                                return_batch=False,
                                schema="schema/thor_cot_schema.json")

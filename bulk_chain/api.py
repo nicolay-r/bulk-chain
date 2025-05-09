@@ -12,7 +12,8 @@ from bulk_chain.core.service_schema import SchemaService
 from bulk_chain.core.utils import attempt_wrapper
 
 INFER_MODES = {
-    "batch": lambda llm, batch: llm.ask_core(batch)
+    "single": lambda llm, batch: [llm.ask(prompt) for prompt in batch],
+    "batch": lambda llm, batch: llm.ask(batch)
 }
 
 
@@ -93,6 +94,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
     """
+    assert (infer_mode in INFER_MODES.keys())
     assert (return_mode in ["batch", "chunk"])
     assert (isinstance(llm, BaseLM))
 
