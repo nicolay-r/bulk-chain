@@ -11,8 +11,7 @@ from bulk_chain.core.service_schema import SchemaService
 
 
 INFER_MODES = {
-    "batch": lambda llm, batch, limit_prompt=None: llm.ask_core(
-        DataService.limit_prompts(batch, limit=limit_prompt))
+    "batch": lambda llm, batch, limit_prompt=None: llm.ask_core(batch)
 }
 
 
@@ -107,7 +106,9 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None, r
     )
 
     content_it = (_infer_batch(batch=batch,
-                               handle_batch_func=lambda batch: INFER_MODES["batch"](llm, batch, limit_prompt),
+                               handle_batch_func=lambda batch: INFER_MODES["batch"](
+                                   llm, DataService.limit_prompts(batch, limit=limit_prompt)
+                               ),
                                handle_missed_value_func=lambda *_: None,
                                return_mode=return_mode,
                                schema=schema,
