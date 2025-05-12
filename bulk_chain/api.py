@@ -51,8 +51,6 @@ def _iter_batch_prompts(c, batch_content_it, **kwargs):
 
 def _iter_batch_responses(p_column, batch_content_it, **kwargs):
     p_batch = [item[p_column] for item in batch_content_it]
-    # TODO. This part could be async.
-    # TODO. ind_in_batch might be a part of the async return.
     for ind_in_batch, entry in enumerate(kwargs["handle_batch_func"](p_batch)):
         yield ind_in_batch, _iter_entry_content(entry=entry)
 
@@ -104,7 +102,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
         the given `schema`
     """
     assert (infer_mode in INFER_MODES.keys())
-    assert (return_mode in ["batch", "chunk"])
+    assert (return_mode in ["batch", "chunk", "record"])
     assert (isinstance(llm, BaseLM))
 
     # Quick initialization of the schema.
