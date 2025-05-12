@@ -60,12 +60,11 @@ class TestAPI(unittest.TestCase):
                                llm=self.llm,
                                batch_size=5,
                                infer_mode="batch_stream_async",
-                               return_mode="batch",
+                               return_mode="chunk",
                                schema=join(current_dir, "schema/default.json"))
 
-        for batch in data_it:
-            for item in batch:
-                print(item)
+        for chunk_info in data_it:
+            print(chunk_info[0])
 
 
 if __name__ == '__main__':

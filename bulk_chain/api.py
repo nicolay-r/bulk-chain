@@ -1,4 +1,3 @@
-import asyncio
 import collections
 import logging
 import os
@@ -19,8 +18,7 @@ INFER_MODES = {
     "single_stream": lambda llm, batch: [llm.ask_stream(prompt) for prompt in batch],
     "batch": lambda llm, batch: llm.ask(batch),
     "batch_async": lambda llm, batch: AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_async),
-    # TODO. Here we actually have to launch async for over the results (aiter) of all outputs.
-    "batch_stream_async": lambda llm, batch: AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_stream_async)
+    "batch_stream_async": lambda llm, batch: NotImplemented()
 }
 
 
