@@ -10,6 +10,7 @@ from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_schema import SchemaService
+from bulk_chain.core.service_threading import ThreadingService
 from bulk_chain.core.utils import attempt_wrapper
 
 
@@ -37,9 +38,17 @@ def _iter_batch_prompts(c, batch_content_it, **kwargs):
 def __handle_agen_to_gen(gen, **kwargs):
     """ This handler provides conversion of the async generator to generator (sync).
     """
-    for ind_in_batch, chunk in AsyncioService.async_gen_to_iter(gen=AsyncioService.merge_generators(gen),
-                                                                loop=kwargs.get("loop", None)):
-        yield ind_in_batch, chunk
+
+    def __wrap_with_index(async_gens):
+        async def wrapper(index, agen):
+            async for item in agen:
+                yield index, item
+        return [wrapper(i, agen) for i, agen in enumerate(async_gens)]
+
+    it = ThreadingService.async_gen_to_iter(AsyncioService.merge_generators(*__wrap_with_index(gen)))
+
+    for ind_in_batch, chunk in it:
+        yield ind_in_batch, str(chunk)
 
 
 def __handle_gen(gen, **kwargs):
@@ -63,7 +72,7 @@ def __handle_gen(gen, **kwargs):
 def _iter_chunks(p_column, batch_content_it, **kwargs):
     handler = __handle_agen_to_gen if kwargs["infer_mode"] == "batch_stream_async" else __handle_gen
     p_batch = [item[p_column] for item in batch_content_it]
-    for ind_in_batch, chunk in handler(gen=kwargs["handle_batch_func"](p_batch), **kwargs):
+    for ind_in_batch, chunk in handler(kwargs["handle_batch_func"](p_batch), **kwargs):
         yield ind_in_batch, chunk
 
 

@@ -18,7 +18,7 @@ class BaseLM(object):
         """
         raise NotImplemented()
 
-    async def ask_stream_async(self, prompt):
+    async def ask_stream_async(self, batch):
         """ Assumes to return AsyncGenerator.
         """
         raise NotImplemented()
