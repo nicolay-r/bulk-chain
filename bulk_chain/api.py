@@ -79,7 +79,7 @@ def _iter_chunks(p_column, batch_content_it, **kwargs):
         yield ind_in_batch, chunk
 
 
-def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
+def _infer_batch(batch, batch_ind, schema, return_mode, cols=None, **kwargs):
     assert (isinstance(batch, list))
 
     if len(batch) == 0:
@@ -108,7 +108,8 @@ def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
                 batch[ind_in_batch][c].append(chunk)
                 # Returning (optional).
                 if return_mode == "chunk":
-                    yield [ind_in_batch, c, chunk]
+                    global_ind = batch_ind * len(batch) + ind_in_batch
+                    yield [global_ind, c, chunk]
 
             # Convert content to string.
             for item in batch:
@@ -159,12 +160,13 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
         handle_batch_func = attempt_dec(handle_batch_func)
 
     content_it = (_infer_batch(batch=batch,
+                               batch_ind=batch_ind,
                                infer_mode=infer_mode,
                                handle_batch_func=handle_batch_func,
                                handle_missed_value_func=lambda *_: None,
                                return_mode=return_mode,
                                schema=schema,
                                **kwargs)
-                  for batch in BatchIterator(prompts_it, batch_size=batch_size))
+                  for batch_ind, batch in enumerate(BatchIterator(prompts_it, batch_size=batch_size)))
 
     yield from chain.from_iterable(content_it)
