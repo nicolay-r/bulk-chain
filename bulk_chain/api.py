@@ -1,3 +1,4 @@
+import asyncio
 import collections
 import logging
 import os
@@ -10,7 +11,6 @@ from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_schema import SchemaService
-from bulk_chain.core.service_threading import ThreadingService
 from bulk_chain.core.utils import attempt_wrapper
 
 
@@ -45,7 +45,10 @@ def __handle_agen_to_gen(gen, **kwargs):
                 yield index, item
         return [wrapper(i, agen) for i, agen in enumerate(async_gens)]
 
-    it = ThreadingService.async_gen_to_iter(AsyncioService.merge_generators(*__wrap_with_index(gen)))
+    it = AsyncioService.async_gen_to_iter(
+        gen=AsyncioService.merge_generators(*__wrap_with_index(gen)),
+        loop=asyncio.get_event_loop()
+    )
 
     for ind_in_batch, chunk in it:
         yield ind_in_batch, str(chunk)
