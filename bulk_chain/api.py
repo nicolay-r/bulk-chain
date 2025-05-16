@@ -47,10 +47,11 @@ def _iter_batch_prompts(c, batch_content_it, **kwargs):
         yield ind_in_batch, content
 
 
-def _iter_batch_responses(p_column, batch_content_it, **kwargs):
+def _iter_ordered_batch_responses(p_column, batch_content_it, **kwargs):
     p_batch = [item[p_column] for item in batch_content_it]
     for ind_in_batch, entry in enumerate(kwargs["handle_batch_func"](p_batch)):
-        yield ind_in_batch, _iter_entry_content(entry=entry)
+        for chunk in _iter_entry_content(entry=entry):
+            yield ind_in_batch, chunk
 
 
 def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
@@ -73,17 +74,16 @@ def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
 
         # Handling column for inference.
         if c in schema.r2p:
-            content_it = _iter_batch_responses(p_column=schema.r2p[c], batch_content_it=iter(batch), **kwargs)
-            for ind_in_batch, chunk_it in content_it:
-                for chunk in chunk_it:
-                    # Register new list if needed.
-                    if batch[ind_in_batch][c] is None:
-                        batch[ind_in_batch][c] = []
-                    # Append batch.
-                    batch[ind_in_batch][c].append(chunk)
-                    # Returning (optional).
-                    if return_mode == "chunk":
-                        yield [ind_in_batch, c, chunk]
+            content_it = _iter_ordered_batch_responses(p_column=schema.r2p[c], batch_content_it=iter(batch), **kwargs)
+            for ind_in_batch, chunk in content_it:
+                # Register new list if needed.
+                if batch[ind_in_batch][c] is None:
+                    batch[ind_in_batch][c] = []
+                # Append batch.
+                batch[ind_in_batch][c].append(chunk)
+                # Returning (optional).
+                if return_mode == "chunk":
+                    yield [ind_in_batch, c, chunk]
 
             # Convert content to string.
             for item in batch:
