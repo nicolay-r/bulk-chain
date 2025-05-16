@@ -50,9 +50,9 @@ class AsyncioService:
             https://stackoverflow.com/questions/71580727/translating-async-generator-into-sync-one/78573267#78573267
         """
 
-        loop_crated = False
+        loop_created = False
         if loop is None:
-            loop_crated = True
+            loop_created = True
             loop = asyncio.new_event_loop()
 
         asyncio.set_event_loop(loop)
@@ -63,5 +63,5 @@ class AsyncioService:
                 except StopAsyncIteration:
                     break
         finally:
-            if loop_crated:
+            if loop_created:
                 loop.close()
