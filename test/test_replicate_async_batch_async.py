@@ -1,20 +1,15 @@
 from timeit import default_timer as timer
 import asyncio
 
-from bulk_chain.core.utils import dynamic_init
-from utils import API_TOKEN
+from utils import DEFAULT_REMOTE_LLM
 
-
-llm = dynamic_init(class_filepath="providers/replicate_104.py",
-                   class_name="Replicate")(api_token=API_TOKEN,
-                                           model_name="meta/meta-llama-3-8b-instruct",
-                                           stream=True)
 
 async def infer_item(prompt):
     content = []
-    for chunk in llm.ask(prompt):
+    for chunk in DEFAULT_REMOTE_LLM.ask(prompt):
         content.append(str(chunk))
     return content
+
 
 async def coro_infer_llm(prompt):
     print(f"launch: {prompt}")
@@ -23,10 +18,12 @@ async def coro_infer_llm(prompt):
         r = await response
     return "".join(r)
 
+
 async def main():
     batch = [f"what's the color of the {p}" for p in ["sky", "ground", "water"]]
     routines = [coro_infer_llm(p) for p in batch]
     return await asyncio.gather(*routines)
+
 
 start = timer()
 r = asyncio.run(main())

@@ -1,6 +1,7 @@
+# TODO. LEGACY.
+
 import asyncio
 from replicate.client import Client
-from utils import API_TOKEN
 
 model_version = "meta/meta-llama-3-70b-instruct"
 
@@ -18,7 +19,7 @@ async def replicate_infer_prompts_async():
     
     return await asyncio.gather(*tasks)
 
-client = Client(api_token=API_TOKEN)
+client = Client(api_token="API_TOKEN_GOES_HERE")
 results = asyncio.run(replicate_infer_prompts_async())
 
 # Process results
