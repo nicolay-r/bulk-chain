@@ -60,7 +60,7 @@ class TestAPI(unittest.TestCase):
                                schema=join(current_dir, "schema/default.json"))
 
         for chunk_info in data_it:
-            print(chunk_info[0])
+            print(chunk_info)
 
 
 if __name__ == '__main__':
