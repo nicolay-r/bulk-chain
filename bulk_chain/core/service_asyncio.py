@@ -19,10 +19,8 @@ class AsyncioService:
 
 
     @staticmethod
-    def run_tasks(**tasks_kwargs):
-        return asyncio.get_event_loop().run_until_complete(
-            AsyncioService._run_tasks_async(**tasks_kwargs)
-        )
+    def run_tasks(event_loop, **tasks_kwargs):
+        return event_loop.run_until_complete(AsyncioService._run_tasks_async(**tasks_kwargs))
 
     @staticmethod
     async def merge_generators(*gens: AsyncGenerator[Any, None]) -> AsyncGenerator[Any, None]:

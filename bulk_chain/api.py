@@ -15,11 +15,15 @@ from bulk_chain.core.utils import attempt_wrapper
 
 
 INFER_MODES = {
-    "single": lambda llm, batch: [llm.ask(prompt) for prompt in batch],
-    "single_stream": lambda llm, batch: [llm.ask_stream(prompt) for prompt in batch],
-    "batch": lambda llm, batch: llm.ask(batch),
-    "batch_async": lambda llm, batch: AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_async),
-    "batch_stream_async": lambda llm, batch: AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_stream_async),
+    "single": lambda llm, batch, **kwargs: [llm.ask(prompt) for prompt in batch],
+    "single_stream": lambda llm, batch, **kwargs: [llm.ask_stream(prompt) for prompt in batch],
+    "batch": lambda llm, batch, **kwargs: llm.ask(batch),
+    "batch_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
+        batch=batch, async_handler=llm.ask_async, event_loop=kwargs.get("event_loop")
+    ),
+    "batch_stream_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
+        batch=batch, async_handler=llm.ask_stream_async, event_loop=kwargs.get("event_loop")
+    ),
 }
 
 
@@ -35,7 +39,7 @@ def _iter_batch_prompts(c, batch_content_it, **kwargs):
         yield ind_in_batch, content
 
 
-def __handle_agen_to_gen(gen, **kwargs):
+def __handle_agen_to_gen(handle, batch, event_loop):
     """ This handler provides conversion of the async generator to generator (sync).
     """
 
@@ -45,16 +49,17 @@ def __handle_agen_to_gen(gen, **kwargs):
                 yield index, item
         return [wrapper(i, agen) for i, agen in enumerate(async_gens)]
 
+    agen_list = handle(batch, event_loop=event_loop)
+
     it = AsyncioService.async_gen_to_iter(
-        gen=AsyncioService.merge_generators(*__wrap_with_index(gen)),
-        loop=asyncio.get_event_loop()
-    )
+        gen=AsyncioService.merge_generators(*__wrap_with_index(agen_list)),
+        loop=event_loop)
 
     for ind_in_batch, chunk in it:
         yield ind_in_batch, str(chunk)
 
 
-def __handle_gen(gen, **kwargs):
+def __handle_gen(handle, batch, event_loop):
     """ This handler deals with the iteration of each individual element of the batch.
     """
 
@@ -67,7 +72,7 @@ def __handle_gen(gen, **kwargs):
         else:
             raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
 
-    for ind_in_batch, entry in enumerate(gen):
+    for ind_in_batch, entry in enumerate(handle(batch, event_loop=event_loop)):
         for chunk in _iter_entry_content(entry=entry):
             yield ind_in_batch, chunk
 
@@ -75,7 +80,8 @@ def __handle_gen(gen, **kwargs):
 def _iter_chunks(p_column, batch_content_it, **kwargs):
     handler = __handle_agen_to_gen if kwargs["infer_mode"] == "batch_stream_async" else __handle_gen
     p_batch = [item[p_column] for item in batch_content_it]
-    for ind_in_batch, chunk in handler(kwargs["handle_batch_func"](p_batch), **kwargs):
+    it = handler(handle=kwargs["handle_batch_func"], batch=p_batch, event_loop=kwargs["event_loop"])
+    for ind_in_batch, chunk in it:
         yield ind_in_batch, chunk
 
 
@@ -124,7 +130,8 @@ def _infer_batch(batch, batch_ind, schema, return_mode, cols=None, **kwargs):
 
 
 def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
-                 infer_mode="batch", return_mode="batch", attempts=1, **kwargs):
+                 infer_mode="batch", return_mode="batch", attempts=1, event_loop=None,
+                 **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
@@ -132,6 +139,10 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
     assert (infer_mode in INFER_MODES.keys())
     assert (return_mode in ["batch", "chunk", "record"])
     assert (isinstance(llm, BaseLM))
+
+    # Setup event loop.
+    event_loop = asyncio.get_event_loop_policy().get_event_loop() \
+        if event_loop is None else event_loop
 
     # Quick initialization of the schema.
     if isinstance(schema, str):
@@ -144,8 +155,10 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
         input_dicts_it
     )
 
-    handle_batch_func = lambda batch: INFER_MODES[infer_mode](
-        llm, DataService.limit_prompts(batch, limit=limit_prompt)
+    handle_batch_func = lambda batch, **handle_kwargs: INFER_MODES[infer_mode](
+        llm,
+        DataService.limit_prompts(batch, limit=limit_prompt),
+        **handle_kwargs
     )
 
     # Optional wrapping into attempts.
@@ -166,6 +179,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
                                handle_missed_value_func=lambda *_: None,
                                return_mode=return_mode,
                                schema=schema,
+                               event_loop=event_loop,
                                **kwargs)
                   for batch_ind, batch in enumerate(BatchIterator(prompts_it, batch_size=batch_size)))
 
