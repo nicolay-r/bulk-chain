@@ -2,7 +2,6 @@ import collections
 import logging
 import os
 from itertools import chain
-from typing import AsyncGenerator
 
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_asyncio import AsyncioService
@@ -13,29 +12,17 @@ from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_schema import SchemaService
 from bulk_chain.core.utils import attempt_wrapper
 
+
 INFER_MODES = {
     "single": lambda llm, batch: [llm.ask(prompt) for prompt in batch],
     "single_stream": lambda llm, batch: [llm.ask_stream(prompt) for prompt in batch],
     "batch": lambda llm, batch: llm.ask(batch),
     "batch_async": lambda llm, batch: AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_async),
-    "batch_stream_async": lambda llm, batch: NotImplemented()
+    "batch_stream_async": lambda llm, batch: AsyncioService.run_tasks(batch=batch, async_handler=llm.ask_stream_async),
 }
 
 
 CWD = os.getcwd()
-
-
-def _iter_entry_content(entry):
-
-    if isinstance(entry, str):
-        yield entry
-    elif isinstance(entry, collections.abc.Iterable):
-        for chunk in map(lambda item: str(item), entry):
-            yield chunk
-    elif isinstance(entry, AsyncGenerator):
-        raise Exception("Not Supported Yet!")
-    else:
-        raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
 
 
 def _iter_batch_prompts(c, batch_content_it, **kwargs):
@@ -47,11 +34,37 @@ def _iter_batch_prompts(c, batch_content_it, **kwargs):
         yield ind_in_batch, content
 
 
-def _iter_ordered_batch_responses(p_column, batch_content_it, **kwargs):
-    p_batch = [item[p_column] for item in batch_content_it]
-    for ind_in_batch, entry in enumerate(kwargs["handle_batch_func"](p_batch)):
+def __handle_agen_to_gen(gen, **kwargs):
+    """ This handler provides conversion of the async generator to generator (sync).
+    """
+    for ind_in_batch, chunk in AsyncioService.async_gen_to_iter(gen=AsyncioService.merge_generators(gen),
+                                                                loop=kwargs.get("loop", None)):
+        yield ind_in_batch, chunk
+
+
+def __handle_gen(gen, **kwargs):
+    """ This handler deals with the iteration of each individual element of the batch.
+    """
+
+    def _iter_entry_content(entry):
+        if isinstance(entry, str):
+            yield entry
+        elif isinstance(entry, collections.abc.Iterable):
+            for chunk in map(lambda item: str(item), entry):
+                yield chunk
+        else:
+            raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
+
+    for ind_in_batch, entry in enumerate(gen):
         for chunk in _iter_entry_content(entry=entry):
             yield ind_in_batch, chunk
+
+
+def _iter_chunks(p_column, batch_content_it, **kwargs):
+    handler = __handle_agen_to_gen if kwargs["infer_mode"] == "batch_stream_async" else __handle_gen
+    p_batch = [item[p_column] for item in batch_content_it]
+    for ind_in_batch, chunk in handler(gen=kwargs["handle_batch_func"](p_batch), **kwargs):
+        yield ind_in_batch, chunk
 
 
 def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
@@ -74,11 +87,11 @@ def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
 
         # Handling column for inference.
         if c in schema.r2p:
-            content_it = _iter_ordered_batch_responses(p_column=schema.r2p[c], batch_content_it=iter(batch), **kwargs)
+            content_it = _iter_chunks(p_column=schema.r2p[c], batch_content_it=iter(batch), **kwargs)
+            # Register values.
+            for item in batch:
+                item[c] = []
             for ind_in_batch, chunk in content_it:
-                # Register new list if needed.
-                if batch[ind_in_batch][c] is None:
-                    batch[ind_in_batch][c] = []
                 # Append batch.
                 batch[ind_in_batch][c].append(chunk)
                 # Returning (optional).
@@ -134,6 +147,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
         handle_batch_func = attempt_dec(handle_batch_func)
 
     content_it = (_infer_batch(batch=batch,
+                               infer_mode=infer_mode,
                                handle_batch_func=handle_batch_func,
                                handle_missed_value_func=lambda *_: None,
                                return_mode=return_mode,
