@@ -75,15 +75,19 @@ def _infer_batch(batch, schema, return_mode, cols=None, **kwargs):
         if c in schema.r2p:
             content_it = _iter_batch_responses(p_column=schema.r2p[c], batch_content_it=iter(batch), **kwargs)
             for ind_in_batch, chunk_it in content_it:
-
-                chunks = []
                 for chunk in chunk_it:
-                    chunks.append(chunk)
-
+                    # Register new list if needed.
+                    if batch[ind_in_batch][c] is None:
+                        batch[ind_in_batch][c] = []
+                    # Append batch.
+                    batch[ind_in_batch][c].append(chunk)
+                    # Returning (optional).
                     if return_mode == "chunk":
                         yield [ind_in_batch, c, chunk]
 
-                batch[ind_in_batch][c] = "".join(chunks)
+            # Convert content to string.
+            for item in batch:
+                item[c] = "".join(item[c])
 
     if return_mode == "record":
         for record in batch:
