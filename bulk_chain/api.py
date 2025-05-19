@@ -131,7 +131,7 @@ def _infer_batch(batch, batch_ind, schema, return_mode, cols=None, **kwargs):
 
 def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
                  infer_mode="batch", return_mode="batch", attempts=1, event_loop=None,
-                 **kwargs):
+                 handle_missed_value_func=lambda *_: None, **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
@@ -172,11 +172,12 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
                                       logger=logger)
         handle_batch_func = attempt_dec(handle_batch_func)
 
+    kwargs["handle_missed_value_func"] = handle_missed_value_func
+
     content_it = (_infer_batch(batch=batch,
                                batch_ind=batch_ind,
                                infer_mode=infer_mode,
                                handle_batch_func=handle_batch_func,
-                               handle_missed_value_func=lambda *_: None,
                                return_mode=return_mode,
                                schema=schema,
                                event_loop=event_loop,
