@@ -37,8 +37,8 @@ pip install git+https://github.com/nicolay-r/bulk-chain@master
 
 ## Chain-of-Thought Schema
 
-To declare Chain-of-Though (CoT) schema, this project exploits `JSON` format.
-This format adopts `name` field for declaring a name and `schema` is a list of CoT instructions for the Large Language Model.
+To declare Chain-of-Though (CoT) schema, this project exploits `JSON` format. 
+The field `schema` is a list of CoT instructions for the Large Language Model.
 
 Each step represents a dictionary with `prompt` and `out` keys that corresponds to the input prompt and output variable name respectively.
 All the variable names are expected to be mentioned in `{}`.
@@ -47,13 +47,12 @@ Below, is an example on how to declare your own schema:
 
 ```python
 {
-"name": "schema-name",
-"schema": [
-    {"prompt": "Given the question '{text}', let's think step-by-step.", 
-     "out": "steps"},
-    {"prompt": "For the question '{text}' the reasoining steps are '{steps}'. what would be an answer?", 
-     "out":  "answer"},
-]
+    "schema": [
+        {"prompt": "Given the question '{text}', let's think step-by-step.", 
+         "out": "steps"},
+        {"prompt": "For the question '{text}' the reasoining steps are '{steps}'. what would be an answer?", 
+         "out":  "answer"},
+    ]
 }
 ```
 
