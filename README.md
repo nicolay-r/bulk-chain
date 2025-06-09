@@ -73,7 +73,7 @@ content_it = iter_content(
     # 1. Your schema.              
     schema="YOUR_SCHEMA.json",
     # 2. Your third-party model implementation.
-    llm=dynamic_init(class_filepath="replicate_104.py", class_name="Replicate")(api_token="<API-KEY>"),
+    llm=dynamic_init(class_filepath="replicate_104.py")(api_token="<API-KEY>"),
     # 3. Customize your inference and result providing modes: 
     infer_mode="batch_async", 
     return_mode="batch",

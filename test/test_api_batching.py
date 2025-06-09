@@ -9,9 +9,9 @@ from utils import iter_test_jsonl_samples
 
 class TestProviderBatching(unittest.TestCase):
 
-    llm = dynamic_init(class_filepath="providers/transformers_flan_t5.py",
-                       class_name="FlanT5")(model_name="nicolay-r/flan-t5-tsa-thor-base",
-                                            max_new_tokens=128)
+    llm = dynamic_init(class_filepath="providers/transformers_flan_t5.py")(
+        model_name="nicolay-r/flan-t5-tsa-thor-base",
+        max_new_tokens=128)
 
     def test_iter(self):
         input_dicts_it = iter_test_jsonl_samples()

@@ -1,3 +1,4 @@
+import ast
 import importlib
 import logging
 import sys
@@ -61,6 +62,17 @@ def auto_import(name, is_class=False):
     return m() if is_class else m
 
 
+def get_class_name(file_path):
+    with open(file_path, 'r') as f:
+        tree = ast.parse(f.read(), filename=file_path)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            return node.name
+
+    return None
+
+
 def dynamic_init(class_filepath, class_name=None):
 
     # Registering path.
@@ -75,7 +87,7 @@ def dynamic_init(class_filepath, class_name=None):
         class_filename = class_filename[:-len(".py")]
 
     # Loading library.
-    class_name = class_path_list[-1].title() if class_name is None else class_name
+    class_name = get_class_name(class_filepath) if class_name is None else class_name
     class_path = ".".join([class_filename, class_name])
     logger.info(f"Dynamic loading for the file and class `{class_path}`")
     cls = auto_import(class_path, is_class=False)

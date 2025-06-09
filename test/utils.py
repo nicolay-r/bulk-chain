@@ -8,7 +8,7 @@ TEST_DATA_DIR = join(current_dir, "data")
 
 
 def default_remote_llm():
-    return dynamic_init(class_filepath="providers/replicate_104.py", class_name="Replicate")(
+    return dynamic_init(class_filepath="providers/replicate_104.py")(
         api_token="TOKEN_GOES_HERE",
         model_name="meta/meta-llama-3-8b-instruct",
         stream=True)
