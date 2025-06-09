@@ -149,6 +149,8 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
         schema = JsonService.read(schema)
     if isinstance(schema, dict):
         schema = SchemaService(json_data=schema)
+    if isinstance(schema, list):
+        schema = SchemaService(json_data={"schema": schema})
 
     prompts_it = map(
         lambda data: DictionaryService.custom_update(src_dict=dict(data), other_dict=schema.cot_args),

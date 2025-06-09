@@ -44,12 +44,11 @@ All the variable names should be mentioned in `{}`.
 
 **Example**:
 ```python
-{
-  "schema": [
-    {"prompt": "Given the question '{text}', let's think step-by-step.", "out": "steps"},
-    {"prompt": "For the question '{text}' the reasoining steps are '{steps}', the answer is?", "out":  "answer"},
-  ]
-}
+[
+  {"prompt": "Given customer message: {text}, detect the customer's intent?", "out": "intent" },
+  {"prompt": "Given customer message: {text}, extract relevant entities?", "out": "entities"},
+  {"prompt": "Given intent: {intent} and entities: {entities}, generate a concise response or action recommendation for support agent.", "out": "action"}
+]
 ```
 
 # Usage
@@ -71,7 +70,11 @@ from bulk_chain.api import iter_content
 
 content_it = iter_content(
     # 1. Your schema.              
-    schema="YOUR_SCHEMA.json",
+    schema=[
+      {"prompt": "Given customer message: {text}, detect the customer's intent?", "out": "intent" },
+      {"prompt": "Given customer message: {text}, extract relevant entities?", "out": "entities"},
+      {"prompt": "Given intent: {intent} and entities: {entities}, generate a concise response or action recommendation for support agent.", "out": "action"}
+    ],
     # 2. Your third-party model implementation.
     llm=dynamic_init(class_filepath="replicate_104.py")(api_token="<API-KEY>"),
     # 3. Customize your inference and result providing modes: 
