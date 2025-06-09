@@ -1,12 +1,15 @@
 from timeit import default_timer as timer
 import asyncio
 
-from utils import DEFAULT_REMOTE_LLM
+from utils import default_remote_llm
+
+
+llm = default_remote_llm()
 
 
 async def infer_item(prompt):
     content = []
-    for chunk in DEFAULT_REMOTE_LLM.ask(prompt):
+    for chunk in llm.ask(prompt):
         content.append(str(chunk))
     return content
 

@@ -1,7 +1,7 @@
 import unittest
 
 from bulk_chain.api import iter_content
-from utils import iter_test_jsonl_samples, DEFAULT_REMOTE_LLM
+from utils import iter_test_jsonl_samples, default_remote_llm
 
 
 class TestAPI_Streaming(unittest.TestCase):
@@ -10,7 +10,7 @@ class TestAPI_Streaming(unittest.TestCase):
 
         input_dicts_it = iter_test_jsonl_samples()
         data_it = iter_content(input_dicts_it=input_dicts_it,
-                               llm=DEFAULT_REMOTE_LLM,
+                               llm=default_remote_llm(),
                                batch_size=1,
                                infer_mode="single_stream",
                                return_mode="chunk",

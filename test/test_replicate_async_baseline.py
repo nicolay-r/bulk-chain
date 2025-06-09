@@ -1,8 +1,11 @@
 from timeit import default_timer as timer
-from utils import DEFAULT_REMOTE_LLM
+from utils import default_remote_llm
+
+
+llm = default_remote_llm()
 
 start = timer()
-r = ["".join([str(s) for s in DEFAULT_REMOTE_LLM.ask(f"what's the color of the {p}")])
+r = ["".join([str(s) for s in llm.ask(f"what's the color of the {p}")])
      for p in ["sky", "ground", "water"]]
 end = timer()
 

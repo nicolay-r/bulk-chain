@@ -1,10 +1,16 @@
+import sys
+
+from os.path import join, dirname, realpath
+
 import asyncio
 
 from bulk_chain.api import INFER_MODES
 from bulk_chain.core.service_asyncio import AsyncioService
 from bulk_chain.core.utils import dynamic_init
 
-DEFAULT_REMOTE_LLM = dynamic_init(class_filepath="../providers/replicate_104.py",
+
+current_dir = dirname(realpath(__file__))
+DEFAULT_REMOTE_LLM = dynamic_init(class_filepath=join(current_dir, "../providers/replicate_104.py"),
                                   class_name="Replicate")(
     api_token="TOKEN_GOES_HERE",
     model_name="meta/meta-llama-3-8b-instruct",
