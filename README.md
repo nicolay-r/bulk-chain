@@ -76,7 +76,9 @@ content_it = iter_content(
       {"prompt": "Given intent: {intent} and entities: {entities}, generate a concise response or action recommendation for support agent.", "out": "action"}
     ],
     # 2. Your third-party model implementation.
-    llm=dynamic_init(class_filepath="replicate_104.py")(api_token="<API-KEY>"),
+    llm=dynamic_init(class_filepath="replicate_104.py")(
+       api_token="<API-KEY>",
+       model_name="meta/meta-llama-3-70b-instruct"),
     # 3. Customize your inference and result providing modes: 
     infer_mode="batch_async", 
     return_mode="batch",
