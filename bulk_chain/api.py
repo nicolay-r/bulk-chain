@@ -121,6 +121,9 @@ def _infer_batch(batch, batch_ind, schema, return_mode, cols=None, **kwargs):
             for item in batch:
                 item[c] = "".join(item[c])
 
+    # TODO. These modes below represent a post-formatted result.
+    # TODO. This should  be a separated parameter which has: "none" (as-it-is), "record" (group into record), or "batch".
+
     if return_mode == "record":
         for record in batch:
             yield record
