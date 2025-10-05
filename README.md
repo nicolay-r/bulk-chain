@@ -81,7 +81,6 @@ content_it = iter_content(
        model_name="meta/meta-llama-3-70b-instruct"),
     # 3. Customize your inference and result providing modes: 
     infer_mode="batch_async", 
-    return_mode="batch",
     # 4. Your iterator of dictionaries
     input_dicts_it=YOUR_DATA_IT,
 )

@@ -122,31 +122,40 @@ def _column_ordered_chunks_iter(batch, schema, cols=None, **kwargs):
                 item[c] = "".join(item[c])
 
 
-def _infer_batch(return_mode, batch, batch_ind, **kwargs):
+def _infer_batch(return_type, batch, batch_ind, **kwargs):
+    assert (return_type in ["batch", "chunk", "record"])
 
     # Filling batch with inference content.
     for ind_in_batch, column, chunk in _column_ordered_chunks_iter(batch=batch, **kwargs):
-        if return_mode == "chunk":
+        if return_type == "chunk":
             global_ind = batch_ind * len(batch) + ind_in_batch
             yield [global_ind, column, chunk]
 
-    if return_mode == "record":
+    if return_type == "record":
         for record in batch:
             yield record
 
-    if return_mode == "batch":
+    if return_type == "batch":
         yield batch
 
 
+def get_return_content_type(infer_mode):
+    if "stream" in infer_mode:
+        return 'chunk'
+    elif "batch" in infer_mode:
+        return 'batch'
+    else:
+        return 'record'
+
+
 def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
-                 infer_mode="batch", return_mode="batch", attempts=1, event_loop=None,
+                 infer_mode="batch", attempts=1, event_loop=None,
                  handle_missed_value_func=lambda *_: None, **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
     """
     assert (infer_mode in INFER_MODES.keys())
-    assert (return_mode in ["batch", "chunk", "record"])
     assert (isinstance(llm, BaseLM))
 
     # Setup event loop.
@@ -185,11 +194,11 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
 
     kwargs["handle_missed_value_func"] = handle_missed_value_func
 
-    content_it = (_infer_batch(batch=batch,
+    content_it = (_infer_batch(return_type=get_return_content_type(infer_mode=infer_mode),
+                               batch=batch,
                                batch_ind=batch_ind,
                                infer_mode=infer_mode,
                                handle_batch_func=handle_batch_func,
-                               return_mode=return_mode,
                                schema=schema,
                                event_loop=event_loop,
                                **kwargs)

@@ -19,7 +19,6 @@ class TestAPI(unittest.TestCase):
                                llm=self.llm,
                                batch_size=1,
                                infer_mode="single",
-                               return_mode="batch",
                                schema=join(current_dir, "schema/default.json"))
 
         for data in data_it:
@@ -28,39 +27,36 @@ class TestAPI(unittest.TestCase):
     def test_single_stream(self):
         """ Returns individual chunks.
         """
-        data_it = iter_content(input_dicts_it=self.it_data(20),
-                               llm=self.llm,
-                               batch_size=1,
-                               infer_mode="single_stream",
-                               return_mode="chunk",
-                               schema=join(current_dir, "schema/default.json"))
+        chunk_it = iter_content(input_dicts_it=self.it_data(20),
+                                llm=self.llm,
+                                batch_size=1,
+                                infer_mode="single_stream",
+                                schema=join(current_dir, "schema/default.json"))
 
-        for data in data_it:
+        for data in chunk_it:
             print(data)
 
     def test_batch_async(self):
         """ Return batches that passed async at the Replicate.
         """
-        data_it = iter_content(input_dicts_it=self.it_data(20),
-                               llm=self.llm,
-                               batch_size=5,
-                               infer_mode="batch_async",
-                               return_mode="batch",
-                               schema=join(current_dir, "schema/default.json"))
+        batch_it = iter_content(input_dicts_it=self.it_data(20),
+                                llm=self.llm,
+                                batch_size=5,
+                                infer_mode="batch_async",
+                                schema=join(current_dir, "schema/default.json"))
 
-        for batch in data_it:
+        for batch in batch_it:
             for item in batch:
                 print(item)
 
     def test_batch_stream_async(self):
-        data_it = iter_content(input_dicts_it=self.it_data(20),
-                               llm=self.llm,
-                               batch_size=5,
-                               infer_mode="batch_stream_async",
-                               return_mode="chunk",
-                               schema=join(current_dir, "schema/default.json"))
+        chunk_it = iter_content(input_dicts_it=self.it_data(20),
+                                llm=self.llm,
+                                batch_size=5,
+                                infer_mode="batch_stream_async",
+                                schema=join(current_dir, "schema/default.json"))
 
-        for chunk_info in data_it:
+        for chunk_info in chunk_it:
             print(chunk_info)
 
 

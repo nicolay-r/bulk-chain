@@ -13,7 +13,6 @@ class TestAPI_Streaming(unittest.TestCase):
                                llm=default_remote_llm(),
                                batch_size=1,
                                infer_mode="single_stream",
-                               return_mode="chunk",
                                attempts=2,
                                schema="schema/thor_cot_schema.json")
 
