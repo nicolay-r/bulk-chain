@@ -85,11 +85,14 @@ def _iter_chunks(p_column, batch_content_it, **kwargs):
         yield ind_in_batch, chunk
 
 
-def _infer_batch(batch, batch_ind, schema, return_mode, cols=None, **kwargs):
+def _column_ordered_chunks_iter(batch, schema, cols=None, **kwargs):
+    """
+    NOTE: we populate `batch` content automatically
+    """
     assert (isinstance(batch, list))
 
     if len(batch) == 0:
-        return batch
+        return
 
     if cols is None:
         first_item = batch[0]
@@ -112,17 +115,20 @@ def _infer_batch(batch, batch_ind, schema, return_mode, cols=None, **kwargs):
             for ind_in_batch, chunk in content_it:
                 # Append batch.
                 batch[ind_in_batch][c].append(chunk)
-                # Returning (optional).
-                if return_mode == "chunk":
-                    global_ind = batch_ind * len(batch) + ind_in_batch
-                    yield [global_ind, c, chunk]
+                yield [ind_in_batch, c, chunk]
 
             # Convert content to string.
             for item in batch:
                 item[c] = "".join(item[c])
 
-    # TODO. These modes below represent a post-formatted result.
-    # TODO. This should  be a separated parameter which has: "none" (as-it-is), "record" (group into record), or "batch".
+
+def _infer_batch(return_mode, batch, batch_ind, **kwargs):
+
+    # Filling batch with inference content.
+    for ind_in_batch, column, chunk in _column_ordered_chunks_iter(batch=batch, **kwargs):
+        if return_mode == "chunk":
+            global_ind = batch_ind * len(batch) + ind_in_batch
+            yield [global_ind, column, chunk]
 
     if return_mode == "record":
         for record in batch:
