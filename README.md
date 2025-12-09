@@ -94,6 +94,11 @@ for content in content_it:
 
 All you have to do is to implement `BaseLM` class, that includes:
 * `__init__` -- for setting up *batching mode support* and (optional) *model name*;
-* `ask(prompt)` -- infer your model with the given `prompt`.
+* **sync modes**:
+    * `ask(prompt)` -- infer your model with single prompt;
+    * `ask_stream(prompt)` -- returns generator of chunks over inferred result.
+* **async modes**:
+    * `ask_async(prompt)` 
+    * `ask_stream_async(prompt)`
 
 See examples with models [at nlp-thirdgate 🌌](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
