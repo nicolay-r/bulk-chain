@@ -90,15 +90,13 @@ for content in content_it:
 ```
 
 
-# Embed your LLM
+# API
 
-All you have to do is to implement `BaseLM` class, that includes:
-* `__init__` -- for setting up *batching mode support* and (optional) *model name*;
-* **sync modes**:
-    * `ask(prompt)` -- infer your model with single prompt;
-    * `ask_stream(prompt)` -- returns generator of chunks over inferred result.
-* **async modes**:
-    * `ask_async(prompt)` 
-    * `ask_stream_async(prompt)`
+| Method               | Mode       | Description                                                         |
+|----------------------|------------|---------------------------------------------------------------------|
+| `ask(prompt)`        | Sync       | Infers the model with a single prompt.                              |
+| `ask_stream(prompt)` | Sync       | Returns a generator that yields chunks of the inferred result.      |
+| `ask_async(prompt)`  | Async      | Asynchronously infers the model with a single prompt.               |
+| `ask_stream_async(prompt)` | Async | Asynchronously returns a generator of result chunks of the inferred result.          |
 
 See examples with models [at nlp-thirdgate 🌌](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
