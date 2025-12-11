@@ -89,6 +89,17 @@ for content in content_it:
     # Handle your LLM responses here ...
 ```
 
+The type of the `content` variable depends on `infer_mode` declared above.
+
+Below is the table that describes expected content type to the infer mode:
+
+| Infer Modes            | Content Type |
+|------------------------|--------------|
+| `single`               | record       |
+| `single_stream`        | chunk        |
+| `batch`                | batch        |
+| `batch_async`          | batch        |
+| `batch_stream_async`   | chunk        |
 
 # API
 
