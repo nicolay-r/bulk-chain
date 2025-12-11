@@ -89,6 +89,8 @@ for content in content_it:
     # Handle your LLM responses here ...
 ```
 
+## Inference Modes
+
 The type of the `content` variable depends on `infer_mode` declared above.
 
 Below is the table that describes expected content type to the infer mode:
