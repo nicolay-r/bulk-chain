@@ -95,9 +95,9 @@ for batch in content_it:
 ```
 
 Outputs entries represent texts augmented with `topic` and `subject`:
-```
-{'text': 'Rocks are hard', 'topic': 'The topic is: **Geology/Rocks**', 'subject': 'The subject is: "Rocks"'}
-{'text': 'Water is wet', 'topic': 'The topic is:\n\n**Properties of Water**', 'subject': 'The subject is: Water'}
+```jsonl
+{'text': 'Rocks are hard', 'topic': 'The topic is: Geology/Rocks', 'subject': 'The subject is: "Rocks"'}
+{'text': 'Water is wet', 'topic': 'The topic is: Properties of Water', 'subject': 'The subject is: Water'}
 {'text': 'Fire is hot', 'topic': 'The topic is: Temperature/Properties of Fire', 'subject': 'The subject is: "Fire"'}
 ```
 
