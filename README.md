@@ -45,9 +45,8 @@ All the variable names should be mentioned in `{}`.
 **Example**:
 ```python
 [
-  {"prompt": "Given customer message: {text}, detect the customer's intent?", "out": "intent" },
-  {"prompt": "Given customer message: {text}, extract relevant entities?", "out": "entities"},
-  {"prompt": "Given intent: {intent} and entities: {entities}, generate a concise response or action recommendation for support agent.", "out": "action"}
+  {"prompt": "extract topic: {text}", "out": "topic"},
+  {"prompt": "extract subject: {text}", "out": "subject"},
 ]
 ```
 
