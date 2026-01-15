@@ -3,12 +3,12 @@ class BaseLM(object):
     def __init__(self, **kwargs):
         pass
 
-    def ask(self, content):
+    def ask(self, prompt):
         """ Assumes to return str.
         """
         raise NotImplemented()
 
-    def ask_stream(self, content):
+    def ask_stream(self, prompt):
         """ Assumes to return generator.
         """
         raise NotImplemented()
@@ -18,7 +18,7 @@ class BaseLM(object):
         """
         raise NotImplemented()
 
-    async def ask_stream_async(self, batch):
+    async def ask_stream_async(self, prompt):
         """ Assumes to return AsyncGenerator.
         """
         raise NotImplemented()

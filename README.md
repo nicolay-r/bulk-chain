@@ -95,11 +95,27 @@ for batch in content_it:
       print(entry)
 ```
 
+## Inference Modes
 
-# Embed your LLM
+The type of the `content` variable depends on `infer_mode` declared above.
 
-All you have to do is to implement `BaseLM` class, that includes:
-* `__init__` -- for setting up *batching mode support* and (optional) *model name*;
-* `ask(prompt)` -- infer your model with the given `prompt`.
+Below is the table that describes expected content type to the infer mode:
+
+| Infer Modes            | Content Type |
+|------------------------|--------------|
+| `single`               | record       |
+| `single_stream`        | chunk        |
+| `batch`                | batch        |
+| `batch_async`          | batch        |
+| `batch_stream_async`   | chunk        |
+
+# API
+
+| Method               | Mode       | Description                                                         |
+|----------------------|------------|---------------------------------------------------------------------|
+| `ask(prompt)`        | Sync       | Infers the model with a single prompt.                              |
+| `ask_stream(prompt)` | Sync       | Returns a generator that yields chunks of the inferred result.      |
+| `ask_async(prompt)`  | Async      | Asynchronously infers the model with a single prompt.               |
+| `ask_stream_async(prompt)` | Async | Asynchronously returns a generator of result chunks of the inferred result.          |
 
 See examples with models [at nlp-thirdgate 🌌](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
