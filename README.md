@@ -94,6 +94,13 @@ for batch in content_it:
       print(entry)
 ```
 
+Outputs entries represent texts augmented with `topic` and `subject`:
+```
+{'text': 'Rocks are hard', 'topic': 'The topic is: **Geology/Rocks**', 'subject': 'The subject is: "Rocks"'}
+{'text': 'Water is wet', 'topic': 'The topic is:\n\n**Properties of Water**', 'subject': 'The subject is: Water'}
+{'text': 'Fire is hot', 'topic': 'The topic is: Temperature/Properties of Fire', 'subject': 'The subject is: "Fire"'}
+```
+
 ## Inference Modes
 
 The type of the `content` variable depends on `infer_mode` declared above.
