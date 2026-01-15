@@ -71,9 +71,8 @@ from bulk_chain.api import iter_content
 content_it = iter_content(
     # 1. Your schema.              
     schema=[
-      {"prompt": "Given customer message: {text}, detect the customer's intent?", "out": "intent" },
-      {"prompt": "Given customer message: {text}, extract relevant entities?", "out": "entities"},
-      {"prompt": "Given intent: {intent} and entities: {entities}, generate a concise response or action recommendation for support agent.", "out": "action"}
+      {"prompt": "extract topic: {text}", "out": "topic" },
+      {"prompt": "extract subject: {text}", "out": "subject"},
     ],
     # 2. Your third-party model implementation.
     llm=dynamic_init(class_filepath="replicate_104.py")(
@@ -81,12 +80,19 @@ content_it = iter_content(
        model_name="meta/meta-llama-3-70b-instruct"),
     # 3. Customize your inference and result providing modes: 
     infer_mode="batch_async", 
+    batch_size=10,
     # 4. Your iterator of dictionaries
-    input_dicts_it=YOUR_DATA_IT,
+    input_dicts_it=[
+        # Example of data ...
+        { "text": "Rocks are hard" },
+        { "text": "Water is wet" },
+        { "text": "Fire is hot" }
+    ],
 )
     
-for content in content_it:
-    # Handle your LLM responses here ...
+for batch in content_it:
+   for entry in batch:
+      print(entry)
 ```
 
 
