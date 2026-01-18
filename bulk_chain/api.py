@@ -16,8 +16,8 @@ from bulk_chain.core.utils import attempt_wrapper
 
 INFER_MODES = {
     "single": lambda llm, batch, **kwargs: [llm.ask(prompt) for prompt in batch],
+    "batch": lambda llm, batch, **kwargs: llm.ask_batch(batch),
     "single_stream": lambda llm, batch, **kwargs: [llm.ask_stream(prompt) for prompt in batch],
-    "batch": lambda llm, batch, **kwargs: llm.ask(batch),
     "batch_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
         batch=batch, async_handler=llm.ask_async, event_loop=kwargs.get("event_loop")
     ),

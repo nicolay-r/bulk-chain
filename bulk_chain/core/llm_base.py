@@ -8,6 +8,11 @@ class BaseLM(object):
         """
         raise NotImplemented()
 
+    def ask_batch(self, batch):
+        """ Assumes to return generator.
+        """
+        raise NotImplemented()
+
     def ask_stream(self, prompt):
         """ Assumes to return generator.
         """
