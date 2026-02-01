@@ -77,8 +77,8 @@ content_it = iter_content(
     llm=dynamic_init(class_filepath="replicate_104.py")(
        api_token="<API-KEY>",
        model_name="meta/meta-llama-3-70b-instruct"),
-    # 3. Customize your inference and result providing modes: 
-    infer_mode="batch_async", 
+    # 3. Toggle streaming if needed
+    stream=False,
     batch_size=10,
     # 4. Your iterator of dictionaries
     input_dicts_it=[
@@ -100,20 +100,6 @@ Outputs entries represent texts augmented with `topic` and `subject`:
 {'text': 'Water is wet', 'topic': 'The topic is: Properties of Water', 'subject': 'The subject is: Water'}
 {'text': 'Fire is hot', 'topic': 'The topic is: Temperature/Properties of Fire', 'subject': 'The subject is: "Fire"'}
 ```
-
-## Inference Modes
-
-The type of the `content` variable depends on `infer_mode` declared above.
-
-Below is the table that describes expected content type to the infer mode:
-
-| Infer Modes            | Content Type |
-|------------------------|--------------|
-| `single`               | record       |
-| `single_stream`        | chunk        |
-| `batch`                | batch        |
-| `batch_async`          | batch        |
-| `batch_stream_async`   | chunk        |
 
 # API
 

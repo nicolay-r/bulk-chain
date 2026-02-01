@@ -5,7 +5,7 @@ from bulk_chain.core.utils import dynamic_init
 # Tested under: https://github.com/nicolay-r/nlp-thirdgate/blob/master/llm/openai_156.py
 provider = dynamic_init(class_filepath="providers/openai_156.py")(
     base_url="https://api.novita.ai/openai",
-    api_token="<API_TOKEN>",
+    api_token="sk_qpuGSSuz4sF3PgWXg72wstp6-ojtYt1rX3pdXTVocPU",
     model_name="meta-llama/llama-3.3-70b-instruct")
 
 content_it = iter_content(
@@ -17,9 +17,11 @@ content_it = iter_content(
     # 2. Your third-party model implementation.
     llm=provider,
     batch_size=10,
-    # 3. Customize your inference and result providing modes: 
-    infer_mode="batch_async",
-    # 4. Your iterator of dictionaries
+    # 3. Toggle streaming if needed
+    stream=False,
+    # 4. Toggle asynchronous mode if needed
+    async_mode=True,
+    # 5. Your iterator of dictionaries
     input_dicts_it=[
         { "text": "Rocks are hard" },
         { "text": "Water is wet" },

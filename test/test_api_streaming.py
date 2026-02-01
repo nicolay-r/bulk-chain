@@ -12,7 +12,7 @@ class TestAPI_Streaming(unittest.TestCase):
         data_it = iter_content(input_dicts_it=input_dicts_it,
                                llm=default_remote_llm(),
                                batch_size=1,
-                               infer_mode="single_stream",
+                               stream=True,
                                attempts=2,
                                schema="schema/thor_cot_schema.json")
 

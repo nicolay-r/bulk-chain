@@ -18,7 +18,6 @@ class TestAPI(unittest.TestCase):
         data_it = iter_content(input_dicts_it=self.it_data(20),
                                llm=self.llm,
                                batch_size=1,
-                               infer_mode="single",
                                schema=join(current_dir, "schema/default.json"))
 
         for data in data_it:
@@ -30,7 +29,7 @@ class TestAPI(unittest.TestCase):
         chunk_it = iter_content(input_dicts_it=self.it_data(20),
                                 llm=self.llm,
                                 batch_size=1,
-                                infer_mode="single_stream",
+                                stream=True,
                                 schema=join(current_dir, "schema/default.json"))
 
         for data in chunk_it:
@@ -42,7 +41,7 @@ class TestAPI(unittest.TestCase):
         batch_it = iter_content(input_dicts_it=self.it_data(20),
                                 llm=self.llm,
                                 batch_size=5,
-                                infer_mode="batch_async",
+                                async_mode=True,
                                 schema=join(current_dir, "schema/default.json"))
 
         for batch in batch_it:
@@ -53,7 +52,8 @@ class TestAPI(unittest.TestCase):
         chunk_it = iter_content(input_dicts_it=self.it_data(20),
                                 llm=self.llm,
                                 batch_size=5,
-                                infer_mode="batch_stream_async",
+                                stream=True,
+                                async_mode=True,
                                 schema=join(current_dir, "schema/default.json"))
 
         for chunk_info in chunk_it:

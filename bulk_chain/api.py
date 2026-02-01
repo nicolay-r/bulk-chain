@@ -139,24 +139,35 @@ def _infer_batch(return_type, batch, batch_ind, **kwargs):
         yield batch
 
 
-def get_return_content_type(infer_mode):
-    if "stream" in infer_mode:
-        return 'chunk'
-    elif "batch" in infer_mode:
-        return 'batch'
-    else:
-        return 'record'
+def get_infer_mode(stream, batch_size, async_mode):
+    if not stream and batch_size == 1:
+        return 'single', 'record'
+    elif not stream and batch_size > 1:
+        if async_mode:
+            return 'batch_async', 'batch'
+        else:
+            return 'batch', 'batch'
+    elif stream and batch_size == 1:
+        return 'single_stream', 'chunk'
+    elif stream and batch_size > 1:
+        return 'batch_stream_async', 'chunk'
+
+    raise ValueError(f"Invalid combination of stream and batch_size: {stream}, {batch_size}")
 
 
 def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
-                 infer_mode="batch", attempts=1, event_loop=None,
+                 stream=False, async_mode=False, attempts=1, event_loop=None,
                  handle_missed_value_func=lambda *_: None, **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
     """
-    assert (infer_mode in INFER_MODES.keys())
     assert (isinstance(llm, BaseLM))
+    assert (isinstance(batch_size, int) and batch_size > 0)
+    assert (isinstance(async_mode, bool)) 
+
+    infer_type, return_type = get_infer_mode(stream=stream, batch_size=batch_size, async_mode=async_mode)
+    infer_mode = INFER_MODES[infer_type]
 
     # Setup event loop.
     event_loop = asyncio.get_event_loop_policy().get_event_loop() \
@@ -175,7 +186,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
         input_dicts_it
     )
 
-    handle_batch_func = lambda batch, **handle_kwargs: INFER_MODES[infer_mode](
+    handle_batch_func = lambda batch, **handle_kwargs: infer_mode(
         llm,
         DataService.limit_prompts(batch, limit=limit_prompt),
         **handle_kwargs
@@ -194,7 +205,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
 
     kwargs["handle_missed_value_func"] = handle_missed_value_func
 
-    content_it = (_infer_batch(return_type=get_return_content_type(infer_mode=infer_mode),
+    content_it = (_infer_batch(return_type=return_type,
                                batch=batch,
                                batch_ind=batch_ind,
                                infer_mode=infer_mode,
