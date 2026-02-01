@@ -3,6 +3,7 @@ import collections
 import logging
 import os
 from itertools import chain
+from types import AsyncGeneratorType
 
 from bulk_chain.core.llm_base import BaseLM
 from bulk_chain.core.service_asyncio import AsyncioService
@@ -69,6 +70,9 @@ def __handle_gen(handle, batch, event_loop):
         elif isinstance(entry, collections.abc.Iterable):
             for chunk in map(lambda item: str(item), entry):
                 yield chunk
+        elif isinstance(entry, AsyncGeneratorType):
+            for chunk in AsyncioService.async_gen_to_iter(entry, loop=event_loop):
+                yield str(chunk)
         else:
             raise Exception(f"Non supported type `{type(entry)}` for handling output from batch")
 
