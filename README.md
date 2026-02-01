@@ -79,8 +79,11 @@ content_it = iter_content(
        model_name="meta/meta-llama-3-70b-instruct"),
     # 3. Toggle streaming if needed
     stream=False,
+    # 4. Toggle Async API mode usage.
+    async_mode=True,
+    # 5. Batch size.
     batch_size=10,
-    # 4. Your iterator of dictionaries
+    # 6. Your iterator of dictionaries
     input_dicts_it=[
         # Example of data ...
         { "text": "Rocks are hard" },
