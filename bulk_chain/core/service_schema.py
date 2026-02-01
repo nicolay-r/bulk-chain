@@ -10,6 +10,10 @@ class SchemaService(object):
         return cls(prompt_schema)
 
     @staticmethod
+    def col_to_prompt(col_name, prompt_data):
+        return col_name + "_prompt" if "in" not in prompt_data else prompt_data["in"]
+
+    @staticmethod
     def __init_schema(prompts):
 
         schema_args = {}
@@ -19,7 +23,7 @@ class SchemaService(object):
 
         for prompt in prompts:
             r_col_name = prompt["out"]
-            p_col_name = r_col_name + "_prompt" if "in" not in prompt else prompt["in"]
+            p_col_name = SchemaService.col_to_prompt(col_name=r_col_name, prompt_data=prompt)
 
             assert r_col_name not in schema_r2p, f"`{r_col_name}` has been already declared!"
             assert p_col_name not in schema_p2r, f"`{p_col_name}` has been already declared!"

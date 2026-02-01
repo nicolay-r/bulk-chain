@@ -89,7 +89,7 @@ def _iter_chunks(p_column, batch_content_it, **kwargs):
         yield ind_in_batch, chunk
 
 
-def _column_ordered_chunks_iter(batch, schema, cols=None, **kwargs):
+def _column_ordered_chunks_iter(batch, schema, cols=None, keep_prompts=True, **kwargs):
     """
     NOTE: we populate `batch` content automatically
     """
@@ -124,6 +124,13 @@ def _column_ordered_chunks_iter(batch, schema, cols=None, **kwargs):
             # Convert content to string.
             for item in batch:
                 item[c] = "".join(item[c])
+
+    if not keep_prompts:
+        for batch_item in batch:
+            for key in list(batch_item.keys()):
+                prompt_col = SchemaService.col_to_prompt(col_name=key, prompt_data=batch_item)
+                if prompt_col in batch_item:
+                    del batch_item[prompt_col]
 
 
 def _infer_batch(return_type, batch, batch_ind, **kwargs):
