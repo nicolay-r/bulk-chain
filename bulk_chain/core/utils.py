@@ -36,18 +36,30 @@ def find_by_prefix(d, key):
     return d[matches[0]]
 
 
+def check_is_param_name(param_name):
+    return param_name.replace("_", "").isalpha()
+
+
 def iter_params(text):
     assert(isinstance(text, str))
     beg = 0
     while beg < len(text):
+        print(beg)
         try:
             pb = text.index('{', beg)
         except ValueError:
             break
-        pe = text.index('}', beg+1)
-        # Yield argument.
-        yield text[pb+1:pe]
-        beg = pe+1
+        pe = text.index('}', pb+1)
+        param_name = text[pb + 1:pe]
+
+        # Check parameter validity.
+        if not check_is_param_name(param_name):
+            beg = pb + 1
+            continue
+
+        # Passing.
+        yield param_name
+        beg = pe + 1
 
 
 def auto_import(name, is_class=False):
