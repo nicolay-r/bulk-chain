@@ -114,3 +114,8 @@ Outputs entries represent texts augmented with `topic` and `subject`:
 | `ask_stream_async(prompt)` | Async | Asynchronously returns a generator of result chunks of the inferred result.          |
 
 See examples with models [at nlp-thirdgate 🌌](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
+
+
+# Similar Projects
+
+* [lite-llm](https://github.com/BerriAI/litellm)
