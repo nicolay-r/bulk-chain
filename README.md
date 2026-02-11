@@ -1,4 +1,4 @@
-# bulk-chain 1.2.1
+# bulk-chain 1.2.2
 ![](https://img.shields.io/badge/Python-3.9-brightgreen.svg)
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nicolay-r/bulk-chain/blob/master/bulk_chain_tutorial.ipynb)
 [![twitter](https://img.shields.io/twitter/url/https/shields.io.svg?style=social)](https://x.com/nicolayr_/status/1847969224636961033)
