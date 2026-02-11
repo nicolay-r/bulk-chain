@@ -173,7 +173,7 @@ def get_infer_mode(stream, batch_size, async_mode, async_policy):
     elif not stream and batch_size > 1:
         if async_mode:
             if async_policy == "prompt":
-                return 'batch_async', 'batch'
+                return 'single_async', 'batch'
             elif async_policy == "batch":
                 return 'batch_async', 'batch'
             else:
