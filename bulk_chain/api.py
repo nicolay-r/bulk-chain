@@ -19,11 +19,28 @@ INFER_MODES = {
     "single": lambda llm, batch, **kwargs: [llm.ask(prompt) for prompt in batch],
     "batch": lambda llm, batch, **kwargs: llm.ask_batch(batch),
     "single_stream": lambda llm, batch, **kwargs: [llm.ask_stream(prompt) for prompt in batch],
+    # Accept single prompt and return co-routine.
+    "single_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
+        batch=batch, async_handler=llm.ask_async, 
+        event_loop=kwargs.get("event_loop"), 
+        async_policy="prompt"
+    ),
+    "single_stream_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
+        batch=batch, 
+        async_handler=llm.ask_stream_async, 
+        event_loop=kwargs.get("event_loop"), 
+        async_policy="prompt"
+    ),
+    # Accept batch of prompts and return co-routine.
     "batch_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
-        batch=batch, async_handler=llm.ask_async, event_loop=kwargs.get("event_loop")
+        batch=batch, async_handler=llm.ask_batch_async, 
+        event_loop=kwargs.get("event_loop"), 
+        async_policy="batch"
     ),
     "batch_stream_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
-        batch=batch, async_handler=llm.ask_stream_async, event_loop=kwargs.get("event_loop")
+        batch=batch, async_handler=llm.ask_stream_batch_async, 
+        event_loop=kwargs.get("event_loop"), 
+        async_policy="batch"
     ),
 }
 
@@ -150,24 +167,37 @@ def _infer_batch(return_type, batch, batch_ind, **kwargs):
         yield batch
 
 
-def get_infer_mode(stream, batch_size, async_mode):
+def get_infer_mode(stream, batch_size, async_mode, async_policy):
     if not stream and batch_size == 1:
         return 'single', 'record'
     elif not stream and batch_size > 1:
         if async_mode:
-            return 'batch_async', 'batch'
+            if async_policy == "prompt":
+                return 'batch_async', 'batch'
+            elif async_policy == "batch":
+                return 'batch_async', 'batch'
+            else:
+                raise ValueError(f"Invalid async policy: {async_policy}")
         else:
             return 'batch', 'batch'
     elif stream and batch_size == 1:
         return 'single_stream', 'chunk'
     elif stream and batch_size > 1:
-        return 'batch_stream_async', 'chunk'
+        if async_mode:
+            if async_policy == "prompt":
+                return 'single_stream_async', 'chunk'
+            elif async_policy == "batch":
+                return 'batch_stream_async', 'chunk'
+            else:
+                raise ValueError(f"Invalid async policy: {async_policy}")
+        else:
+            return 'batch_stream', 'chunk'
 
     raise ValueError(f"Invalid combination of stream and batch_size: {stream}, {batch_size}")
 
 
 def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
-                 stream=False, async_mode=False, attempts=1, event_loop=None,
+                 stream=False, async_mode=False, async_policy="prompt", attempts=1, event_loop=None,
                  handle_missed_value_func=lambda *_: None, **kwargs):
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
@@ -176,8 +206,14 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
     assert (isinstance(llm, BaseLM))
     assert (isinstance(batch_size, int) and batch_size > 0)
     assert (isinstance(async_mode, bool)) 
+    assert (async_policy in ["prompt", "batch"])
 
-    infer_type, return_type = get_infer_mode(stream=stream, batch_size=batch_size, async_mode=async_mode)
+    infer_type, return_type = get_infer_mode(
+        stream=stream, 
+        batch_size=batch_size, 
+        async_mode=async_mode, 
+        async_policy=async_policy)
+
     infer_mode = INFER_MODES[infer_type]
 
     # Setup event loop.

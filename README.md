@@ -106,12 +106,22 @@ Outputs entries represent texts augmented with `topic` and `subject`:
 
 # API
 
-| Method               | Mode       | Description                                                         |
-|----------------------|------------|---------------------------------------------------------------------|
-| `ask(prompt)`        | Sync       | Infers the model with a single prompt.                              |
-| `ask_stream(prompt)` | Sync       | Returns a generator that yields chunks of the inferred result.      |
-| `ask_async(prompt)`  | Async      | Asynchronously infers the model with a single prompt.               |
-| `ask_stream_async(prompt)` | Async | Asynchronously returns a generator of result chunks of the inferred result.          |
+Methods that accept single `prompt`:
+
+| Method                     | Mode  | Description                                                                  |
+|----------------------------|-------|------------------------------------------------------------------------------|
+| `ask(prompt)`              | Sync  | Infers the model with a single prompt.                                       |
+| `ask_stream(prompt)`       | Sync  | Returns a generator that yields chunks of the inferred result.               |
+| `ask_async(prompt)`        | Async | Asynchronously infers the model with a single prompt.                        |
+| `ask_stream_async(prompt)` | Async | Asynchronously returns a generator of result chunks of the inferred result.  |
+
+Methods that accept `batch`:
+
+| Method                          | Mode       | Description                                                                 |
+|---------------------------------|------------|-----------------------------------------------------------------------------|
+| `ask_batch(batch)`              | Sync       | Infers the model with a single prompt.                                      |
+| `ask_async_batch(batch)`        | Async      | Asynchronously infers the model with a single prompt.                       |
+| `ask_stream_batch_async(batch)` | Async      | Asynchronously returns a generator of result chunks of the inferred result. |
 
 See examples with models [at nlp-thirdgate 🌌](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
 

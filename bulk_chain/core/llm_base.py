@@ -19,11 +19,21 @@ class BaseLM(object):
         raise NotImplemented()
 
     async def ask_async(self, prompt):
-        """ Assumes to return co-routine.
+        """ Accepts single prompt and returns co-routine.
         """
         raise NotImplemented()
 
     async def ask_stream_async(self, prompt):
-        """ Assumes to return AsyncGenerator.
+        """ Accepts single prompt and returns AsyncGenerator.
+        """
+        raise NotImplemented()
+
+    async def ask_batch_async(self, batch):
+        """ Accepts batch of prompts and returns co-routine.
+        """
+        raise NotImplemented()
+
+    async def ask_stream_batch_async(self, batch):
+        """ Accepts batch of prompts and returns AsyncGenerator.
         """
         raise NotImplemented()

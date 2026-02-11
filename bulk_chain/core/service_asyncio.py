@@ -5,8 +5,15 @@ from typing import AsyncGenerator, Any
 class AsyncioService:
 
     @staticmethod
-    async def _run_tasks_async(batch, async_handler):
-        tasks = [async_handler(prompt) for prompt in batch]
+    async def _run_tasks_async(batch, async_handler, async_policy):
+
+        if async_policy == "prompt":
+            tasks = [async_handler(prompt) for prompt in batch]
+        elif async_policy == "batch":
+            tasks = [async_handler(batch)]
+        else:
+            raise Exception(f"Invalid async policy: {async_policy}")
+
         return await asyncio.gather(*tasks)
 
     @staticmethod
@@ -16,7 +23,6 @@ class AsyncioService:
                 await output_queue.put((idx, item))
         finally:
             await output_queue.put((idx, StopAsyncIteration))
-
 
     @staticmethod
     def run_tasks(event_loop, **tasks_kwargs):
