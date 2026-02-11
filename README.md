@@ -81,6 +81,7 @@ content_it = iter_content(
     stream=False,
     # 4. Toggle Async API mode usage.
     async_mode=True,
+    async_policy='prompt',
     # 5. Batch size.
     batch_size=10,
     # 6. Your iterator of dictionaries
