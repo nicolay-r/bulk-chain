@@ -118,11 +118,10 @@ Methods that accept single `prompt`:
 
 Methods that accept `batch`:
 
-| Method                          | Mode       | Description                                                                 |
-|---------------------------------|------------|-----------------------------------------------------------------------------|
-| `ask_batch(batch)`              | Sync       | Infers the model with a single prompt.                                      |
-| `ask_async_batch(batch)`        | Async      | Asynchronously infers the model with a single prompt.                       |
-| `ask_stream_batch_async(batch)` | Async      | Asynchronously returns a generator of result chunks of the inferred result. |
+| Method                          | Mode       | Description                                                        |
+|---------------------------------|------------|--------------------------------------------------------------------|
+| `ask_batch(batch)`              | Sync       | Infers the model with a single prompt.                             |
+| `ask_async_batch(batch)`        | Async      | Asynchronously infers the model with a single prompt.              |
 
 See examples with models [at nlp-thirdgate 🌌](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
 

@@ -36,12 +36,7 @@ INFER_MODES = {
         batch=batch, async_handler=llm.ask_batch_async, 
         event_loop=kwargs.get("event_loop"), 
         async_policy="batch"
-    ),
-    "batch_stream_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
-        batch=batch, async_handler=llm.ask_stream_batch_async, 
-        event_loop=kwargs.get("event_loop"), 
-        async_policy="batch"
-    ),
+    )[0],
 }
 
 
@@ -77,10 +72,13 @@ def __handle_gen(handle, batch, event_loop):
         for chunk in _iter_entry_content(entry=entry):
             yield ind_in_batch, chunk
 
+def __handle_gen_batch(handle, batch, event_loop):
+    yield from enumerate(handle(batch, event_loop=event_loop))
 
 def _iter_chunks(p_column, batch_content_it, **kwargs):
     p_batch = [item[p_column] for item in batch_content_it]
-    it = __handle_gen(handle=kwargs["handle_batch_func"], batch=p_batch, event_loop=kwargs["event_loop"])
+    handler = __handle_gen_batch if kwargs["infer_type"] == "batch_async" else __handle_gen
+    it = handler(handle=kwargs["handle_batch_func"], batch=p_batch, event_loop=kwargs["event_loop"])
     for ind_in_batch, chunk in it:
         yield ind_in_batch, chunk
 
@@ -166,7 +164,7 @@ def get_infer_mode(stream, batch_size, async_mode, async_policy):
             if async_policy == "prompt":
                 return 'single_stream_async', 'chunk'
             elif async_policy == "batch":
-                return 'batch_stream_async', 'chunk'
+                raise ValueError(f"Invalid async policy: {async_policy}")
             else:
                 raise ValueError(f"Invalid async policy: {async_policy}")
         else:
@@ -234,6 +232,7 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
     content_it = (_infer_batch(return_type=return_type,
                                batch=batch,
                                batch_ind=batch_ind,
+                               infer_type=infer_type,
                                infer_mode=infer_mode,
                                handle_batch_func=handle_batch_func,
                                schema=schema,
