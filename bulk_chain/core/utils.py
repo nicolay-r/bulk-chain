@@ -44,7 +44,6 @@ def iter_params(text):
     assert(isinstance(text, str))
     beg = 0
     while beg < len(text):
-        print(beg)
         try:
             pb = text.index('{', beg)
         except ValueError:
