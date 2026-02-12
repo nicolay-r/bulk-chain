@@ -57,26 +57,6 @@ def _iter_batch_prompts(c, batch_content_it, **kwargs):
         yield ind_in_batch, content
 
 
-def __handle_agen_to_gen(handle, batch, event_loop):
-    """ This handler provides conversion of the async generator to generator (sync).
-    """
-
-    def __wrap_with_index(async_gens):
-        async def wrapper(index, agen):
-            async for item in agen:
-                yield index, item
-        return [wrapper(i, agen) for i, agen in enumerate(async_gens)]
-
-    agen_list = handle(batch, event_loop=event_loop)
-
-    it = AsyncioService.async_gen_to_iter(
-        gen=AsyncioService.merge_generators(*__wrap_with_index(agen_list)),
-        loop=event_loop)
-
-    for ind_in_batch, chunk in it:
-        yield ind_in_batch, str(chunk)
-
-
 def __handle_gen(handle, batch, event_loop):
     """ This handler deals with the iteration of each individual element of the batch.
     """
@@ -99,9 +79,8 @@ def __handle_gen(handle, batch, event_loop):
 
 
 def _iter_chunks(p_column, batch_content_it, **kwargs):
-    handler = __handle_agen_to_gen if kwargs["infer_mode"] == "batch_stream_async" else __handle_gen
     p_batch = [item[p_column] for item in batch_content_it]
-    it = handler(handle=kwargs["handle_batch_func"], batch=p_batch, event_loop=kwargs["event_loop"])
+    it = __handle_gen(handle=kwargs["handle_batch_func"], batch=p_batch, event_loop=kwargs["event_loop"])
     for ind_in_batch, chunk in it:
         yield ind_in_batch, chunk
 
