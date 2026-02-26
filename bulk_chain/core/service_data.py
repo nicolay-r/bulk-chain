@@ -13,7 +13,7 @@ class DataService(object):
             if not isinstance(v, str):
                 Exception("'{k}' parameter is expected to be string, but received '{v}'")
 
-        return prompt.format(**fmt_d)
+        return prompt.format(**fmt_d) if len(fmt_d) > 0 else prompt
 
     @staticmethod
     def get_prompt_text(prompt, data_dict, parse_fields_func=iter_params, handle_missed_func=None):
