@@ -5,7 +5,7 @@ from bulk_chain.core.utils import dynamic_init
 # Tested under: https://github.com/nicolay-r/nlp-thirdgate/blob/master/llm/openai_156.py
 provider = dynamic_init(class_filepath="providers/openai_156.py")(
     base_url="https://api.novita.ai/openai",
-    api_token="sk_qpuGSSuz4sF3PgWXg72wstp6-ojtYt1rX3pdXTVocPU",
+    api_token="<YOUR-API-KEY-GOES-HERE>",
     model_name="meta-llama/llama-3.3-70b-instruct")
 
 content_it = iter_content(
