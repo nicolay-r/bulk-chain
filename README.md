@@ -126,6 +126,11 @@ Methods that accept `batch`:
 See examples with models [at nlp-thirdgate 🌌](https://github.com/nicolay-r/nlp-thirdgate?tab=readme-ov-file#llm).
 
 
-# Similar Projects
+# Similar Concepts
 
+Primary similarity: 
+* LangGraph workflow state
+* ETL/dataflow systems
+  
+Minor similarity: 
 * [lite-llm](https://github.com/BerriAI/litellm)
