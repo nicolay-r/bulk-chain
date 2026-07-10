@@ -1,6 +1,8 @@
 import asyncio
 from typing import AsyncGenerator, Any
 
+from bulk_chain.core.service_data import DataService
+
 
 class AsyncioService:
 
@@ -8,7 +10,7 @@ class AsyncioService:
     async def _run_tasks_async(batch, async_handler, async_policy):
 
         if async_policy == "prompt":
-            tasks = [async_handler(prompt) for prompt in batch]
+            tasks = [DataService.call_llm(async_handler, item) for item in batch]
         elif async_policy == "batch":
             tasks = [async_handler(batch)]
         else:

@@ -16,9 +16,9 @@ from bulk_chain.core.utils import attempt_wrapper
 
 
 INFER_MODES = {
-    "single": lambda llm, batch, **kwargs: [llm.ask(prompt) for prompt in batch],
+    "single": lambda llm, batch, **kwargs: [DataService.call_llm(llm.ask, item) for item in batch],
     "batch": lambda llm, batch, **kwargs: llm.ask_batch(batch),
-    "single_stream": lambda llm, batch, **kwargs: [llm.ask_stream(prompt) for prompt in batch],
+    "single_stream": lambda llm, batch, **kwargs: [DataService.call_llm(llm.ask_stream, item) for item in batch],
     # Accept single prompt and return co-routine.
     "single_async": lambda llm, batch, **kwargs: AsyncioService.run_tasks(
         batch=batch, async_handler=llm.ask_async, 
@@ -45,8 +45,8 @@ CWD = os.getcwd()
 
 def _iter_batch_prompts(c, batch_content_it, **kwargs):
     for ind_in_batch, entry in enumerate(batch_content_it):
-        content = DataService.get_prompt_text(
-            prompt=entry[c]["prompt"],
+        content = DataService.resolve_schema_entry(
+            schema_entry=entry[c],
             data_dict=entry,
             handle_missed_func=kwargs["handle_missed_value_func"])
         yield ind_in_batch, content

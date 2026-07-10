@@ -1,5 +1,9 @@
+import sys
 import unittest
-from os.path import join
+from os.path import join, dirname, realpath
+
+current_dir = dirname(realpath(__file__))
+sys.path.insert(0, join(current_dir, ".."))
 
 from bulk_chain.api import iter_content
 from utils import current_dir, default_remote_llm

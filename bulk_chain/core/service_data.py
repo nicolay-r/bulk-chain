@@ -1,3 +1,4 @@
+from bulk_chain.core.service_schema import SchemaService
 from bulk_chain.core.utils import iter_params
 
 
@@ -26,5 +27,42 @@ class DataService(object):
         return DataService.__compose_prompt_text(prompt=prompt, data_dict=data_dict, field_names=field_names)
 
     @staticmethod
+    def resolve_schema_entry(schema_entry, data_dict, parse_fields_func=iter_params, handle_missed_func=None):
+        resolved = {}
+        for field_name, field_value in SchemaService.llm_fields(schema_entry).items():
+            if isinstance(field_value, str):
+                resolved[field_name] = DataService.get_prompt_text(
+                    prompt=field_value,
+                    data_dict=data_dict,
+                    parse_fields_func=parse_fields_func,
+                    handle_missed_func=handle_missed_func)
+            else:
+                resolved[field_name] = field_value
+        return resolved
+
+    @staticmethod
     def limit_prompts(prompts_list, limit=None):
-        return [p[:limit] if limit is not None else p for p in prompts_list]
+        if limit is None:
+            return prompts_list
+
+        limited = []
+        for item in prompts_list:
+            if isinstance(item, dict):
+                entry = dict(item)
+                if "prompt" in entry:
+                    entry["prompt"] = entry["prompt"][:limit]
+                limited.append(entry)
+            else:
+                limited.append(item[:limit])
+        return limited
+
+    @staticmethod
+    def llm_call_args(item):
+        if isinstance(item, dict):
+            return item["prompt"], {k: v for k, v in item.items() if k != "prompt"}
+        return item, {}
+
+    @staticmethod
+    def call_llm(handler, item):
+        prompt, kwargs = DataService.llm_call_args(item)
+        return handler(prompt, **kwargs)

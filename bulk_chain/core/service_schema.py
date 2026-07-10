@@ -1,5 +1,7 @@
 class SchemaService(object):
 
+    SCHEMA_META_KEYS = frozenset({"out", "in"})
+
     def __init__(self, json_data):
         self.src = json_data
         self.r2p, self.p2r, self.cot_args, self.chain = SchemaService.__init_schema(prompts=json_data["schema"])
@@ -12,6 +14,10 @@ class SchemaService(object):
     @staticmethod
     def col_to_prompt(col_name, prompt_data):
         return col_name + "_prompt" if "in" not in prompt_data else prompt_data["in"]
+
+    @staticmethod
+    def llm_fields(schema_entry):
+        return {k: v for k, v in schema_entry.items() if k not in SchemaService.SCHEMA_META_KEYS}
 
     @staticmethod
     def __init_schema(prompts):
