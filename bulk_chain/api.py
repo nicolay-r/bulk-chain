@@ -12,7 +12,7 @@ from bulk_chain.core.service_data import DataService
 from bulk_chain.core.service_dict import DictionaryService
 from bulk_chain.core.service_json import JsonService
 from bulk_chain.core.service_schema import SchemaService
-from bulk_chain.core.utils import attempt_wrapper
+from bulk_chain.core.utils import attempt_wrapper, check_is_param_name, iter_params
 
 
 INFER_MODES = {
@@ -44,10 +44,13 @@ CWD = os.getcwd()
 
 
 def _iter_batch_prompts(c, batch_content_it, **kwargs):
+    check_param_name_func = kwargs.get("check_param_name_func", check_is_param_name)
+    parse_fields_func = lambda text: iter_params(text, check_param_name_func=check_param_name_func)
     for ind_in_batch, entry in enumerate(batch_content_it):
         content = DataService.resolve_schema_entry(
             schema_entry=entry[c],
             data_dict=entry,
+            parse_fields_func=parse_fields_func,
             handle_missed_func=kwargs["handle_missed_value_func"])
         yield ind_in_batch, content
 
@@ -179,6 +182,12 @@ def iter_content(input_dicts_it, llm, schema, batch_size=1, limit_prompt=None,
     """ This method represent Python API aimed at application of `llm` towards
         iterator of input_dicts via cache_target that refers to the SQLite using
         the given `schema`
+
+        kwargs:
+            check_param_name_func: callable(str) -> bool
+                Optional custom validator for parameter names discovered within
+                `{...}` placeholders of the prompt. Defaults to
+                `bulk_chain.core.utils.check_is_param_name`.
     """
     assert (isinstance(llm, BaseLM))
     assert (isinstance(batch_size, int) and batch_size > 0)

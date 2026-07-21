@@ -40,8 +40,9 @@ def check_is_param_name(param_name):
     return param_name.replace("_", "").isalpha()
 
 
-def iter_params(text):
+def iter_params(text, check_param_name_func=check_is_param_name):
     assert(isinstance(text, str))
+    assert(callable(check_param_name_func))
     beg = 0
     while beg < len(text):
         try:
@@ -52,7 +53,7 @@ def iter_params(text):
         param_name = text[pb + 1:pe]
 
         # Check parameter validity.
-        if not check_is_param_name(param_name):
+        if not check_param_name_func(param_name):
             beg = pb + 1
             continue
 

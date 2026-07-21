@@ -1,5 +1,4 @@
 from bulk_chain.core.service_schema import SchemaService
-from bulk_chain.core.utils import iter_params
 
 
 class DataService(object):
@@ -17,7 +16,7 @@ class DataService(object):
         return prompt.format(**fmt_d) if len(fmt_d) > 0 else prompt
 
     @staticmethod
-    def get_prompt_text(prompt, data_dict, parse_fields_func=iter_params, handle_missed_func=None):
+    def __get_prompt_text(prompt, data_dict, parse_fields_func, handle_missed_func=None):
         field_names = list(parse_fields_func(prompt))
 
         for col_name in field_names:
@@ -27,11 +26,11 @@ class DataService(object):
         return DataService.__compose_prompt_text(prompt=prompt, data_dict=data_dict, field_names=field_names)
 
     @staticmethod
-    def resolve_schema_entry(schema_entry, data_dict, parse_fields_func=iter_params, handle_missed_func=None):
+    def resolve_schema_entry(schema_entry, data_dict, parse_fields_func, handle_missed_func=None):
         resolved = {}
         for field_name, field_value in SchemaService.llm_fields(schema_entry).items():
             if isinstance(field_value, str):
-                resolved[field_name] = DataService.get_prompt_text(
+                resolved[field_name] = DataService.__get_prompt_text(
                     prompt=field_value,
                     data_dict=data_dict,
                     parse_fields_func=parse_fields_func,
