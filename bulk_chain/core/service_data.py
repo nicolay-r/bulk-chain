@@ -35,6 +35,16 @@ class DataService(object):
                     data_dict=data_dict,
                     parse_fields_func=parse_fields_func,
                     handle_missed_func=handle_missed_func)
+            elif isinstance(field_value, list):
+                resolved[field_name] = [
+                    DataService.__get_prompt_text(
+                        prompt=item,
+                        data_dict=data_dict,
+                        parse_fields_func=parse_fields_func,
+                        handle_missed_func=handle_missed_func)
+                    if isinstance(item, str) else item
+                    for item in field_value
+                ]
             else:
                 resolved[field_name] = field_value
         return resolved
